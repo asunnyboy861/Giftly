@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giftly — Never Forget a Birthday</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #7B68EE 0%, #FF6B9D 100%); min-height: 100vh; color: #fff; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; text-align: center; }
+        .hero { padding: 60px 0 40px; }
+        .hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 16px; text-shadow: 0 2px 20px rgba(0,0,0,0.2); }
+        .hero p { font-size: 1.3rem; opacity: 0.95; max-width: 600px; margin: 0 auto 32px; line-height: 1.6; }
+        .app-icon { width: 120px; height: 120px; border-radius: 28px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); display: inline-flex; align-items: center; justify-content: center; font-size: 56px; margin-bottom: 24px; border: 2px solid rgba(255,255,255,0.3); }
+        .cta-button { display: inline-block; background: #fff; color: #7B68EE; text-decoration: none; padding: 16px 40px; border-radius: 30px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 4px 20px rgba(0,0,0,0.2); transition: transform 0.2s; margin: 8px; }
+        .cta-button:hover { transform: translateY(-2px); }
+        .cta-button.secondary { background: rgba(255,255,255,0.15); color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin: 60px 0; }
+        .feature { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 32px 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
+        .feature-icon { font-size: 2.5rem; margin-bottom: 16px; }
+        .feature h3 { font-size: 1.2rem; margin-bottom: 8px; }
+        .feature p { font-size: 0.95rem; opacity: 0.9; line-height: 1.5; }
+        .pricing { margin: 60px 0; }
+        .pricing h2 { font-size: 2rem; margin-bottom: 24px; }
+        .price-cards { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .price-card { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 32px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); min-width: 200px; }
+        .price-card h3 { font-size: 1.3rem; margin-bottom: 8px; }
+        .price-card .price { font-size: 2rem; font-weight: 800; margin: 12px 0; }
+        .price-card ul { list-style: none; text-align: left; }
+        .price-card li { padding: 6px 0; opacity: 0.9; font-size: 0.9rem; }
+        .price-card li::before { content: "✓ "; color: #4ECDC4; font-weight: bold; }
+        .footer { margin-top: 60px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.9rem; opacity: 0.8; }
+        .footer a { color: #fff; text-decoration: underline; margin: 0 8px; }
+        .no-sub { background: rgba(255,255,255,0.1); padding: 12px 24px; border-radius: 20px; display: inline-block; margin-top: 16px; font-weight: 600; }
+        @media (max-width: 600px) { .hero h1 { font-size: 2rem; } .hero p { font-size: 1.1rem; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <div class="app-icon">🎁</div>
+            <h1>Giftly</h1>
+            <p>Never forget a birthday again. Plan thoughtful gifts with AI-powered suggestions, track your ideas, and always be prepared.</p>
+            <div>
+                <a href="#" class="cta-button" id="appStoreBtn">Coming Soon to the App Store</a>
+                <a href="support.html" class="cta-button secondary">Get Support</a>
+            </div>
+            <div class="no-sub">No subscriptions. Ever. One-time purchases only.</div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🎂</div>
+                <h3>Smart Birthday Reminders</h3>
+                <p>Get notified 7 days, 1 day, and on the day of every birthday. Always have time to plan the perfect gift.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🪄</div>
+                <h3>AI Gift Suggestions</h3>
+                <p>Get personalized gift ideas based on interests, age, and budget. Powered by your own API key — unlimited use.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📋</div>
+                <h3>Gift Idea Tracking</h3>
+                <p>Track gifts from idea to given. Never give the same gift twice. Keep a history of every gift you've given.</p>
+            </div>
+        </div>
+
+        <div class="pricing">
+            <h2>Simple, Honest Pricing</h2>
+            <p style="margin-bottom: 24px; opacity: 0.9;">Free to download. All core features free forever.</p>
+            <div class="price-cards">
+                <div class="price-card">
+                    <h3>Free</h3>
+                    <div class="price">$0</div>
+                    <ul>
+                        <li>Unlimited people tracking</li>
+                        <li>Yearly birthday reminders</li>
+                        <li>Gift idea lists</li>
+                        <li>Gift history</li>
+                        <li>Contact import</li>
+                        <li>Export & import backup</li>
+                    </ul>
+                </div>
+                <div class="price-card">
+                    <h3>Giftly Pro</h3>
+                    <div class="price">$4.99</div>
+                    <ul>
+                        <li>One-time purchase</li>
+                        <li>Support development</li>
+                        <li>All free features</li>
+                        <li>Priority support</li>
+                    </ul>
+                </div>
+                <div class="price-card">
+                    <h3>AI Add-on</h3>
+                    <div class="price">$5.99</div>
+                    <ul>
+                        <li>One-time purchase</li>
+                        <li>AI gift suggestions</li>
+                        <li>Bring your own API key</li>
+                        <li>Unlimited AI use</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Giftly. Made with care.</p>
+            <p style="margin-top: 12px;">
+                <a href="support.html">Support</a> ·
+                <a href="privacy.html">Privacy Policy</a> ·
+                <a href="terms.html">Terms of Use</a>
+            </p>
+        </div>
+    </div>
+    <script>
+        var appId = "[APP_STORE_ID]";
+        var btn = document.getElementById("appStoreBtn");
+        if (appId && appId !== "[APP_STORE_ID]" && /^\d+$/.test(appId)) {
+            btn.href = "https://apps.apple.com/app/id" + appId;
+            btn.textContent = "Download on the App Store";
+        }
+    </script>
+</body>
+</html>
