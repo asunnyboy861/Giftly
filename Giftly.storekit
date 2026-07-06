@@ -1,0 +1,37 @@
+{
+  "identifier" : "4F5B6C7D-8E9F-4A2B-9C3D-7E8F9A0B1C2D",
+  "type" : "local",
+  "version" : 3,
+  "products" : [
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "1A2B3C4D-5E6F-7A8B-9C0D-1E2F3A4B5C6D",
+      "localizations" : [
+        {
+          "description" : "Unlimited tracking & reminders",
+          "displayName" : "Giftly Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.zzoutuo.Giftly.prounlock",
+      "referenceName" : "Giftly Pro",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "5.99",
+      "familyShareable" : false,
+      "internalID" : "2B3C4D5E-6F7A-8B9C-0D1E-2F3A4B5C6D7E",
+      "localizations" : [
+        {
+          "description" : "Unlock AI gift suggestions forever",
+          "displayName" : "AI Add-on",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.zzoutuo.Giftly.aiunlock",
+      "referenceName" : "AI Add-on",
+      "type" : "NonConsumable"
+    }
+  ]
+}
