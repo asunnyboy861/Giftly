@@ -69,6 +69,16 @@ final class GiftViewModel {
             if nextStatus == .purchased {
                 idea.purchasedAt = Date()
             }
+            if nextStatus == .given, let person = idea.person {
+                let description = idea.title
+                let occasion = "Birthday"
+                _ = addGiftHistory(
+                    to: person,
+                    description: description,
+                    occasion: occasion,
+                    dateGiven: Date()
+                )
+            }
             guard let context = modelContext else { return }
             do {
                 try context.save()

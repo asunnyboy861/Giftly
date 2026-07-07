@@ -80,11 +80,15 @@ final class NotificationService {
             content.title = "🎁 Giftly"
             content.sound = .default
             content.categoryIdentifier = "BIRTHDAY_REMINDER"
-            content.userInfo = [
+            var userInfo: [String: Any] = [
                 "personId": person.id.uuidString,
                 "personName": person.name,
                 "daysBefore": daysBefore
             ]
+            if let phone = person.phoneNumber, !phone.isEmpty {
+                userInfo["phoneNumber"] = phone
+            }
+            content.userInfo = userInfo
 
             if daysBefore == 0 {
                 content.body = "It's \(person.name)'s birthday today! 🎂 They're turning \(person.upcomingAge)."

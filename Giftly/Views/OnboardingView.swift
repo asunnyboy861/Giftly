@@ -1,9 +1,18 @@
 import SwiftUI
+import SwiftData
 
 struct OnboardingView: View {
     @Environment(AppViewModel.self) private var appViewModel
+    @Environment(\.modelContext) private var modelContext
     @State private var currentPage = 0
     @State private var isRequestingPermission = false
+    @State private var isImporting = false
+    @State private var importResult: PersonViewModel.ContactImportResult?
+    @State private var showImportAlert = false
+    @State private var personViewModel = PersonViewModel()
+    @StateObject private var purchaseService = PurchaseService.shared
+
+    @Query private var people: [Person]
 
     private let pages: [OnboardingPage] = [
         OnboardingPage(
@@ -33,26 +42,32 @@ struct OnboardingView: View {
                     OnboardingPageView(page: page)
                         .tag(index)
                 }
+                ImportPage
+                    .tag(pages.count)
             }
             .tabViewStyle(.page(indexDisplayMode: .always))
             .indexViewStyle(.page(backgroundDisplayMode: .always))
 
             VStack(spacing: 12) {
-                if currentPage == pages.count - 1 {
+                if currentPage == pages.count {
                     Button {
                         Task {
-                            isRequestingPermission = true
-                            _ = await appViewModel.requestNotificationPermission()
-                            isRequestingPermission = false
-                            appViewModel.completeOnboarding()
+                            isImporting = true
+                            let result = await personViewModel.importFromContacts(
+                                existingPeople: people,
+                                isProUnlocked: purchaseService.isProUnlocked
+                            )
+                            isImporting = false
+                            importResult = result
+                            showImportAlert = true
                         }
                     } label: {
                         HStack {
-                            if isRequestingPermission {
+                            if isImporting {
                                 ProgressView()
                                     .tint(.white)
                             }
-                            Text(isRequestingPermission ? "Setting up..." : "Get Started")
+                            Text(isImporting ? "Importing..." : "Import from Contacts")
                                 .font(.headline)
                         }
                         .frame(maxWidth: .infinity)
@@ -60,11 +75,36 @@ struct OnboardingView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(Color("GiftlyPurple"))
-                    .disabled(isRequestingPermission)
+                    .disabled(isImporting)
                     .padding(.horizontal)
 
                     Button {
-                        appViewModel.completeOnboarding()
+                        finishOnboarding()
+                    } label: {
+                        Text(people.isEmpty ? "Skip for now" : "Done")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                } else if currentPage == pages.count - 1 {
+                    Button {
+                        withAnimation {
+                            currentPage += 1
+                        }
+                    } label: {
+                        HStack {
+                            Text("Import Birthdays")
+                                .font(.headline)
+                            Image(systemName: "arrow.right")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color("GiftlyPurple"))
+                    .padding(.horizontal)
+
+                    Button {
+                        finishOnboarding()
                     } label: {
                         Text("Maybe later")
                             .font(.subheadline)
@@ -90,6 +130,87 @@ struct OnboardingView: View {
             .padding(.top, 8)
         }
         .background(Color(.systemBackground))
+        .onAppear {
+            personViewModel.attach(context: modelContext)
+        }
+        .alert(
+            importResult?.denied == true ? "Contact Access Denied" : "Found \(importResult?.importedCount ?? 0) Birthdays!",
+            isPresented: $showImportAlert
+        ) {
+            if importResult?.denied == true {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                    importResult = nil
+                    finishOnboarding()
+                }
+                Button("Skip", role: .cancel) {
+                    importResult = nil
+                    finishOnboarding()
+                }
+            } else {
+                Button("Let's Go!") {
+                    importResult = nil
+                    finishOnboarding()
+                }
+            }
+        } message: {
+            if let result = importResult {
+                if result.denied {
+                    Text("Giftly needs access to your contacts to import birthdays. Please enable Contacts access in Settings, or add them manually later.")
+                } else if result.importedCount > 0 {
+                    Text("Successfully imported \(result.importedCount) birthday\(result.importedCount == 1 ? "" : "s") from your contacts. We'll remind you before each one!")
+                } else {
+                    Text("No new birthdays found in your contacts. You can add them manually later.")
+                }
+            }
+        }
+    }
+
+    private var ImportPage: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            Image(systemName: "person.2.badge.gearshape")
+                .font(.system(size: 100, weight: .light))
+                .foregroundStyle(Color("GiftlyMint").gradient)
+                .padding(.bottom, 8)
+
+            Text("Import in One Tap")
+                .font(.largeTitle.weight(.bold))
+                .multilineTextAlignment(.center)
+
+            Text("Giftly reads ONLY names, birthdays, and photos from your contacts. No phone numbers, emails, or addresses.")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+
+            Spacer()
+
+            HStack(spacing: 8) {
+                Image(systemName: "lock.fill")
+                    .font(.caption)
+                Text("Privacy-first: Your data stays on your device")
+                    .font(.caption)
+            }
+            .foregroundStyle(Color("GiftlyMint"))
+            .padding(.bottom, 8)
+
+            Spacer()
+            Spacer()
+        }
+        .padding()
+    }
+
+    private func finishOnboarding() {
+        Task {
+            isRequestingPermission = true
+            _ = await appViewModel.requestNotificationPermission()
+            isRequestingPermission = false
+            appViewModel.completeOnboarding()
+        }
     }
 }
 
@@ -133,4 +254,5 @@ struct OnboardingPageView: View {
 #Preview {
     OnboardingView()
         .environment(AppViewModel())
+        .modelContainer(for: [Person.self, GiftIdea.self, GiftHistory.self], inMemory: true)
 }

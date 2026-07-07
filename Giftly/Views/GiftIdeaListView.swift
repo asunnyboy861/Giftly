@@ -29,11 +29,13 @@ struct GiftIdeaListView: View {
                                     GiftIdeaRow(idea: idea)
                                         .swipeActions(edge: .trailing) {
                                             Button(role: .destructive) {
+                                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                                 giftViewModel.deleteGiftIdea(idea)
                                             } label: {
                                                 Label("Delete", systemImage: "trash")
                                             }
                                             Button {
+                                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                                 giftViewModel.advanceStatus(of: idea)
                                             } label: {
                                                 Label(idea.status.next?.rawValue ?? "Done",

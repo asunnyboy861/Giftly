@@ -8,8 +8,14 @@ import Combine
 final class PersonViewModel {
     var modelContext: ModelContext?
 
+    static let freeTierLimit = 5
+
     func attach(context: ModelContext) {
         self.modelContext = context
+    }
+
+    func canAddPerson(currentCount: Int, isProUnlocked: Bool) -> Bool {
+        return isProUnlocked || currentCount < Self.freeTierLimit
     }
 
     func createPerson(
@@ -18,7 +24,8 @@ final class PersonViewModel {
         photoData: Data?,
         relationship: String?,
         interests: [String],
-        notes: String?
+        notes: String?,
+        phoneNumber: String? = nil
     ) -> Person? {
         guard let context = modelContext, !name.trimmingCharacters(in: .whitespaces).isEmpty else {
             return nil
@@ -30,7 +37,9 @@ final class PersonViewModel {
             photoData: photoData,
             relationship: relationship?.isEmpty == false ? relationship : nil,
             interests: interests.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty },
-            notes: notes?.isEmpty == false ? notes : nil
+            notes: notes?.isEmpty == false ? notes : nil,
+            phoneNumber: phoneNumber?.trimmingCharacters(in: .whitespaces).isEmpty == false
+                ? phoneNumber?.trimmingCharacters(in: .whitespaces) : nil
         )
         context.insert(person)
         do {
@@ -71,11 +80,17 @@ final class PersonViewModel {
         }
     }
 
-    func importFromContacts(existingPeople: [Person]) async -> Int {
-        guard let context = modelContext else { return 0 }
+    struct ContactImportResult {
+        let importedCount: Int
+        let denied: Bool
+        let skippedDueToLimit: Int
+    }
+
+    func importFromContacts(existingPeople: [Person], isProUnlocked: Bool) async -> ContactImportResult {
+        guard let context = modelContext else { return ContactImportResult(importedCount: 0, denied: false, skippedDueToLimit: 0) }
 
         let granted = await ContactImportService.shared.requestAccess()
-        guard granted else { return 0 }
+        guard granted else { return ContactImportResult(importedCount: 0, denied: true, skippedDueToLimit: 0) }
 
         do {
             let fetchedPeople = try await ContactImportService.shared.fetchContactBirthdays()
@@ -84,17 +99,28 @@ final class PersonViewModel {
                 existingPeople: existingPeople
             )
 
-            for person in newPeople {
+            let availableSlots: Int
+            if isProUnlocked {
+                availableSlots = newPeople.count
+            } else {
+                availableSlots = max(0, Self.freeTierLimit - existingPeople.count)
+            }
+
+            let peopleToInsert = Array(newPeople.prefix(availableSlots))
+            let skippedCount = newPeople.count - peopleToInsert.count
+
+            for person in peopleToInsert {
                 context.insert(person)
             }
             try context.save()
 
-            for person in newPeople {
+            for person in peopleToInsert {
                 NotificationService.shared.scheduleBirthdayReminders(for: person)
             }
-            return newPeople.count
+
+            return ContactImportResult(importedCount: peopleToInsert.count, denied: false, skippedDueToLimit: skippedCount)
         } catch {
-            return 0
+            return ContactImportResult(importedCount: 0, denied: false, skippedDueToLimit: 0)
         }
     }
 

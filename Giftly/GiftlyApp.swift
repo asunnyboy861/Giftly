@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 @main
 struct GiftlyApp: App {
@@ -19,6 +20,8 @@ struct GiftlyApp: App {
         } catch {
             fatalError("Failed to initialize ModelContainer: \(error)")
         }
+
+        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
     }
 
     var body: some Scene {
@@ -34,7 +37,17 @@ struct GiftlyApp: App {
             .modelContainer(modelContainer)
             .task {
                 NotificationService.shared.registerNotificationCategories()
+                await rescheduleAllReminders()
             }
+        }
+    }
+
+    @MainActor
+    private func rescheduleAllReminders() async {
+        let context = modelContainer.mainContext
+        let descriptor = FetchDescriptor<Person>()
+        if let people = try? context.fetch(descriptor) {
+            NotificationService.shared.scheduleAllReminders(for: people)
         }
     }
 }

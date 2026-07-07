@@ -9,15 +9,17 @@ struct CalendarView: View {
 
     @State private var searchText = ""
     @State private var filterFavorites = false
+    @State private var personToDelete: Person?
+    @State private var showDeleteConfirm = false
 
     var body: some View {
         NavigationStack {
             List {
                 if filteredPeople.isEmpty {
                     ContentUnavailableView(
-                        "No People Yet",
-                        systemImage: "person.2",
-                        description: Text("Add people to see their birthdays here.")
+                        filterFavorites ? "No Favorites Yet" : "No People Yet",
+                        systemImage: filterFavorites ? "star" : "person.2",
+                        description: Text(filterFavorites ? "Mark people as favorites to see them here." : "Add people to see their birthdays here.")
                     )
                 } else {
                     ForEach(monthGroups, id: \.0) { month, group in
@@ -27,6 +29,14 @@ struct CalendarView: View {
                                     PersonDetailView(person: person)
                                 } label: {
                                     CalendarRow(person: person)
+                                }
+                                .swipeActions(edge: .trailing) {
+                                    Button(role: .destructive) {
+                                        personToDelete = person
+                                        showDeleteConfirm = true
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
                                 }
                             }
                         } header: {
@@ -46,6 +56,22 @@ struct CalendarView: View {
                         Image(systemName: filterFavorites ? "star.fill" : "star")
                             .foregroundStyle(filterFavorites ? Color("GiftlyCoral") : .accentColor)
                     }
+                }
+            }
+            .alert("Delete Person?", isPresented: $showDeleteConfirm) {
+                Button("Delete", role: .destructive) {
+                    if let person = personToDelete {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        personViewModel.deletePerson(person)
+                    }
+                    personToDelete = nil
+                }
+                Button("Cancel", role: .cancel) {
+                    personToDelete = nil
+                }
+            } message: {
+                if let person = personToDelete {
+                    Text("Delete \(person.name) and all their gift ideas and history? This cannot be undone.")
                 }
             }
         }

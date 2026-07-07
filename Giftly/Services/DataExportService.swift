@@ -8,6 +8,7 @@ struct PersonExportData: Codable {
     let relationship: String?
     let interests: [String]
     let notes: String?
+    let phoneNumber: String?
     let isFavorite: Bool
     let giftIdeas: [GiftIdeaExportData]
     let giftHistory: [GiftHistoryExportData]
@@ -46,6 +47,7 @@ final class DataExportService {
                 relationship: person.relationship,
                 interests: person.interests,
                 notes: person.notes,
+                phoneNumber: person.phoneNumber,
                 isFavorite: person.isFavorite,
                 giftIdeas: person.giftIdeas.map { idea in
                     GiftIdeaExportData(
@@ -91,7 +93,8 @@ final class DataExportService {
                 birthday: personData.birthday,
                 relationship: personData.relationship,
                 interests: personData.interests,
-                notes: personData.notes
+                notes: personData.notes,
+                phoneNumber: personData.phoneNumber
             )
             person.isFavorite = personData.isFavorite
 

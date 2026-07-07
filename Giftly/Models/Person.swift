@@ -10,6 +10,7 @@ final class Person {
     var relationship: String?
     var interests: [String]
     var notes: String?
+    var phoneNumber: String?
     var isFavorite: Bool
     var createdAt: Date
 
@@ -25,7 +26,8 @@ final class Person {
         photoData: Data? = nil,
         relationship: String? = nil,
         interests: [String] = [],
-        notes: String? = nil
+        notes: String? = nil,
+        phoneNumber: String? = nil
     ) {
         self.id = UUID()
         self.name = name
@@ -34,6 +36,7 @@ final class Person {
         self.relationship = relationship
         self.interests = interests
         self.notes = notes
+        self.phoneNumber = phoneNumber
         self.isFavorite = false
         self.createdAt = Date()
     }

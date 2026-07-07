@@ -242,16 +242,21 @@ struct SuggestionCard: View {
             Text(suggestion.reason)
                 .font(.body)
                 .foregroundStyle(.secondary)
-            HStack {
+
+            HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .font(.caption)
                 Text(suggestion.searchTerms)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
+            }
+
+            HStack(spacing: 8) {
                 Button {
                     onAdd()
                     added = true
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                 } label: {
                     Label(added ? "Added" : "Add as Idea", systemImage: added ? "checkmark" : "plus")
                         .font(.caption.weight(.medium))
@@ -259,6 +264,15 @@ struct SuggestionCard: View {
                 .buttonStyle(.bordered)
                 .tint(Color("GiftlyMint"))
                 .disabled(added)
+
+                if let searchURL = amazonSearchURL(suggestion.searchTerms) {
+                    Link(destination: searchURL) {
+                        Label("Search", systemImage: "cart.fill")
+                            .font(.caption.weight(.medium))
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(Color("GiftlyCoral"))
+                }
             }
         }
         .padding()
@@ -266,6 +280,11 @@ struct SuggestionCard: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.secondarySystemBackground))
         )
+    }
+
+    private func amazonSearchURL(_ terms: String) -> URL? {
+        let encoded = terms.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? terms
+        return URL(string: "https://www.amazon.com/s?k=\(encoded)")
     }
 }
 

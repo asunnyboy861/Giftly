@@ -106,10 +106,10 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            TextField("Model (e.g. gpt-4o-mini)", text: $customModel)
+            TextField("Model name", text: $customModel)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
-            TextField("Base URL (default: OpenAI-compatible)", text: $customBaseURL)
+            TextField("Base URL (ChatCompletions-compatible)", text: $customBaseURL)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
             Button("Save API Settings") {
@@ -117,7 +117,7 @@ struct SettingsView: View {
                 GiftAIService.shared.saveModel(customModel)
                 GiftAIService.shared.saveBaseURL(customBaseURL)
             }
-            .disabled(apiKey.trimmingCharacters(in: .whitespaces).isEmpty == false && apiKey.isEmpty)
+            .disabled(apiKey.trimmingCharacters(in: .whitespaces).isEmpty && customModel.trimmingCharacters(in: .whitespaces).isEmpty && customBaseURL.trimmingCharacters(in: .whitespaces).isEmpty)
             if apiKey.isEmpty {
                 Text("Bring your own API key. Stored securely in Keychain. We never see or store your key.")
                     .font(.caption)
@@ -135,7 +135,7 @@ struct SettingsView: View {
         } footer: {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Bring Your Own Key (BYO Key) model: your AI calls go directly to your provider. Giftly never sees or stores your key.")
-                Link("Get an API Key", destination: URL(string: "https://platform.openai.com/api-keys")!)
+                Text("Get an API key from your preferred AI provider (any ChatCompletions-compatible service works).")
                     .font(.caption)
             }
         }

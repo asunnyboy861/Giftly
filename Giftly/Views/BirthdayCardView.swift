@@ -4,6 +4,8 @@ struct BirthdayCardView: View {
     let person: Person
     let isToday: Bool
 
+    @State private var pulse = false
+
     var body: some View {
         HStack(spacing: 14) {
             AvatarView(photoData: person.photoData, name: person.name, size: 56)
@@ -31,7 +33,7 @@ struct BirthdayCardView: View {
             Spacer()
 
             VStack(spacing: 2) {
-                Text(CountdownText)
+                Text(countdownText)
                     .font(.title2.weight(.bold))
                     .foregroundStyle(isToday ? Color("GiftlyCoral") : Color("GiftlyPurple"))
                 if !isToday {
@@ -47,14 +49,23 @@ struct BirthdayCardView: View {
                 .fill(Color(.secondarySystemBackground))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(isToday ? Color("GiftlyCoral").opacity(0.4) : Color.clear, lineWidth: 1.5)
+                        .stroke(isToday ? Color("GiftlyCoral").opacity(pulse ? 0.6 : 0.3) : Color.clear, lineWidth: isToday ? (pulse ? 2.5 : 1.5) : 0)
                 )
+                .shadow(color: isToday ? Color("GiftlyCoral").opacity(pulse ? 0.3 : 0.1) : .clear, radius: isToday ? (pulse ? 8 : 4) : 0)
         )
+        .scaleEffect(isToday && pulse ? 1.02 : 1.0)
+        .onAppear {
+            if isToday {
+                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                    pulse = true
+                }
+            }
+        }
     }
 
-    private var CountdownText: String {
+    private var countdownText: String {
         if isToday {
-            return "🎉"
+            return "Today"
         }
         return "\(person.daysUntilBirthday)"
     }
@@ -82,7 +93,7 @@ struct AvatarView: View {
                 .fill(Color("GiftlyPurple").opacity(0.15))
                 .frame(width: size, height: size)
                 .overlay(
-                    Text(initials.isEmpty ? "🎁" : initials)
+                    Text(initials.isEmpty ? "?" : initials)
                         .font(.system(size: size * 0.4, weight: .semibold))
                         .foregroundStyle(Color("GiftlyPurple"))
                 )
@@ -103,4 +114,3 @@ struct AvatarView: View {
     }
     .padding()
 }
-

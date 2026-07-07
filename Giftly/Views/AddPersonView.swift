@@ -14,6 +14,7 @@ struct AddPersonView: View {
     @State private var photoItem: PhotosPickerItem?
     @State private var photoData: Data?
     @State private var relationship: String = ""
+    @State private var phoneNumber: String = ""
     @State private var newInterest: String = ""
     @State private var interests: [String] = []
     @State private var notes: String = ""
@@ -84,6 +85,15 @@ struct AddPersonView: View {
                 }
 
                 Section {
+                    TextField("Phone number (optional)", text: $phoneNumber)
+                        .keyboardType(.phonePad)
+                } header: {
+                    Text("Phone Number")
+                } footer: {
+                    Text("Enables Call & Message actions from birthday reminders.")
+                }
+
+                Section {
                     HStack {
                         TextField("Add interest", text: $newInterest)
                             .onSubmit(addInterest)
@@ -136,6 +146,7 @@ struct AddPersonView: View {
         birthday = person.birthday
         photoData = person.photoData
         relationship = person.relationship ?? ""
+        phoneNumber = person.phoneNumber ?? ""
         interests = person.interests
         notes = person.notes ?? ""
     }
@@ -155,6 +166,7 @@ struct AddPersonView: View {
             person.relationship = relationship.isEmpty ? nil : relationship
             person.interests = interests
             person.notes = notes.isEmpty ? nil : notes
+            person.phoneNumber = phoneNumber.trimmingCharacters(in: .whitespaces).isEmpty ? nil : phoneNumber.trimmingCharacters(in: .whitespaces)
             personViewModel.updatePerson(person)
         } else {
             _ = personViewModel.createPerson(
@@ -163,7 +175,8 @@ struct AddPersonView: View {
                 photoData: photoData,
                 relationship: relationship,
                 interests: interests,
-                notes: notes
+                notes: notes,
+                phoneNumber: phoneNumber
             )
         }
         dismiss()

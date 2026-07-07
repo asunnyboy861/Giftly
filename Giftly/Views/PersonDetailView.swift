@@ -13,6 +13,8 @@ struct PersonDetailView: View {
     @State private var showingGiftIdeas = false
     @State private var showingAISuggestions = false
     @State private var showingPaywall = false
+    @State private var showingConfetti = false
+    @State private var showingDeleteConfirm = false
 
     var body: some View {
         ScrollView {
@@ -29,10 +31,22 @@ struct PersonDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingEdit = true
+                Menu {
+                    Button {
+                        UISelectionFeedbackGenerator().selectionChanged()
+                        showingEdit = true
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    Divider()
+                    Button(role: .destructive) {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        showingDeleteConfirm = true
+                    } label: {
+                        Label("Delete Person", systemImage: "trash")
+                    }
                 } label: {
-                    Image(systemName: "pencil")
+                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
@@ -47,6 +61,31 @@ struct PersonDetailView: View {
         }
         .sheet(isPresented: $showingPaywall) {
             PaywallView()
+        }
+        .overlay {
+            if showingConfetti {
+                ConfettiView()
+                    .allowsHitTesting(false)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            showingConfetti = false
+                        }
+                    }
+            }
+        }
+        .onAppear {
+            if person.isBirthdayToday {
+                showingConfetti = true
+            }
+        }
+        .alert("Delete Person?", isPresented: $showingDeleteConfirm) {
+            Button("Delete", role: .destructive) {
+                personViewModel.deletePerson(person)
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Delete \(person.name) and all their gift ideas and history? This cannot be undone.")
         }
     }
 
@@ -71,13 +110,51 @@ struct PersonDetailView: View {
             .foregroundStyle(Color("GiftlyPurple"))
 
             if person.isBirthdayToday {
-                Text("🎉 Birthday is today!")
+                Text("Birthday is today!")
                     .font(.headline)
                     .foregroundStyle(Color("GiftlyCoral"))
             } else {
                 Text("\(person.daysUntilBirthday) days until birthday")
                     .font(.headline)
                     .foregroundStyle(Color("GiftlyPurple"))
+            }
+
+            Button {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                personViewModel.toggleFavorite(person)
+            } label: {
+                Label(
+                    person.isFavorite ? "Favorited" : "Add to Favorites",
+                    systemImage: person.isFavorite ? "star.fill" : "star"
+                )
+                .font(.caption.weight(.medium))
+                .foregroundStyle(person.isFavorite ? Color("GiftlyCoral") : .secondary)
+            }
+
+            if let phone = person.phoneNumber, !phone.isEmpty {
+                HStack(spacing: 12) {
+                    if let telURL = URL(string: "tel:\(phone)"), telURL.scheme == "tel" {
+                        Link(destination: telURL) {
+                            Label("Call", systemImage: "phone.fill")
+                                .font(.subheadline.weight(.medium))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(Color("GiftlyMint"))
+                    }
+                    if let smsURL = URL(string: "sms:\(phone)"), smsURL.scheme == "sms" {
+                        Link(destination: smsURL) {
+                            Label("Message", systemImage: "message.fill")
+                                .font(.subheadline.weight(.medium))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(Color("GiftlyCoral"))
+                    }
+                }
+                .padding(.top, 4)
             }
         }
         .frame(maxWidth: .infinity)
@@ -122,7 +199,12 @@ struct PersonDetailView: View {
 
             HStack(spacing: 8) {
                 Button {
-                    showingGiftIdeas = true
+                    UISelectionFeedbackGenerator().selectionChanged()
+                    if purchaseService.isProUnlocked {
+                        showingGiftIdeas = true
+                    } else {
+                        showingPaywall = true
+                    }
                 } label: {
                     Label("View List", systemImage: "list.bullet")
                         .font(.subheadline.weight(.medium))
@@ -133,6 +215,7 @@ struct PersonDetailView: View {
                 .tint(Color("GiftlyPurple"))
 
                 Button {
+                    UISelectionFeedbackGenerator().selectionChanged()
                     if purchaseService_canUseAI {
                         showingAISuggestions = true
                     } else {
@@ -175,7 +258,7 @@ struct PersonDetailView: View {
             }
 
             if person.giftHistory.isEmpty {
-                Text("No gifts recorded yet.")
+                Text("No gifts recorded yet. When you mark a gift as Given, it will appear here.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
@@ -184,7 +267,7 @@ struct PersonDetailView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(history.giftDescription)
                                 .font(.body)
-                            Text("\(history.occasion) · \(formattedDate(history.dateGiven))")
+                            Text("\(history.occasion) - \(formattedDate(history.dateGiven))")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -243,6 +326,34 @@ struct StatCard: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.secondarySystemBackground))
         )
+    }
+}
+
+struct ConfettiView: View {
+    @State private var animate = false
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<30, id: \.self) { i in
+                Circle()
+                    .fill([Color("GiftlyPurple"), Color("GiftlyCoral"), Color("GiftlyMint")].randomElement() ?? .purple)
+                    .frame(width: CGFloat.random(in: 6...12), height: CGFloat.random(in: 6...12))
+                    .position(
+                        x: UIScreen.main.bounds.width / 2,
+                        y: UIScreen.main.bounds.height / 3
+                    )
+                    .offset(
+                        x: animate ? CGFloat.random(in: -200...200) : 0,
+                        y: animate ? CGFloat.random(in: 100...600) : 0
+                    )
+                    .opacity(animate ? 0 : 1)
+                    .rotationEffect(.degrees(animate ? CGFloat.random(in: 0...360) : 0))
+                    .animation(.easeOut(duration: 3).delay(Double.random(in: 0...0.3)), value: animate)
+            }
+        }
+        .onAppear {
+            animate = true
+        }
     }
 }
 
