@@ -6,12 +6,15 @@ import Combine
 @MainActor
 @Observable
 final class AppViewModel {
-    var hasCompletedOnboarding: Bool {
-        UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+    var hasCompletedOnboarding: Bool
+
+    init() {
+        hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
     }
 
     func completeOnboarding() {
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+        hasCompletedOnboarding = true
     }
 
     func requestNotificationPermission() async -> Bool {

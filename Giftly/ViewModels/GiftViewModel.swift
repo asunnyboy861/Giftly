@@ -175,14 +175,14 @@ final class GiftViewModel {
         )
     }
 
-    private func parsePriceRange(_ range: String) -> Double? {
-        let numbers = range.compactMap { char -> Double? in
-            if char.isNumber || char == "." {
-                return char.wholeNumberValue.map(Double.init)
-            }
-            return nil
+    private func parsePriceRange(_ priceRange: String) -> Double? {
+        let pattern = #"\d+(?:\.\d+)?"#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return nil }
+        let matches = regex.matches(in: priceRange, range: NSRange(priceRange.startIndex..., in: priceRange))
+        let numbers = matches.compactMap { match -> Double? in
+            guard let matchRange = Range(match.range, in: priceRange) else { return nil }
+            return Double(priceRange[matchRange])
         }
-        if numbers.isEmpty { return nil }
         return numbers.max()
     }
 }

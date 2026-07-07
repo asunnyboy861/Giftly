@@ -15,6 +15,7 @@ struct PersonDetailView: View {
     @State private var showingPaywall = false
     @State private var showingConfetti = false
     @State private var showingDeleteConfirm = false
+    @State private var showingAddHistory = false
 
     var body: some View {
         ScrollView {
@@ -61,6 +62,16 @@ struct PersonDetailView: View {
         }
         .sheet(isPresented: $showingPaywall) {
             PaywallView()
+        }
+        .sheet(isPresented: $showingAddHistory) {
+            AddGiftHistorySheet { description, occasion, date in
+                _ = giftViewModel.addGiftHistory(
+                    to: person,
+                    description: description,
+                    occasion: occasion,
+                    dateGiven: date
+                )
+            }
         }
         .overlay {
             if showingConfetti {
@@ -168,7 +179,7 @@ struct PersonDetailView: View {
     private var StatsGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             StatCard(
-                title: "Turning",
+                title: "Upcoming Age",
                 value: "\(person.upcomingAge)",
                 subtitle: "years old",
                 icon: "number",
@@ -258,9 +269,10 @@ struct PersonDetailView: View {
             }
 
             if person.giftHistory.isEmpty {
-                Text("No gifts recorded yet. When you mark a gift as Given, it will appear here.")
+                Text("No gifts recorded yet. Record a gift you've given, or mark a gift idea as Given.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .padding(.bottom, 4)
             } else {
                 ForEach(person.giftHistory.sorted(by: { $0.dateGiven > $1.dateGiven })) { history in
                     HStack {
@@ -279,6 +291,17 @@ struct PersonDetailView: View {
                     }
                 }
             }
+
+            Button {
+                showingAddHistory = true
+            } label: {
+                Label("Record a Gift", systemImage: "plus.circle.fill")
+                    .font(.subheadline.weight(.medium))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+            }
+            .buttonStyle(.bordered)
+            .tint(Color("GiftlyMint"))
         }
         .padding()
         .background(
@@ -326,6 +349,59 @@ struct StatCard: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.secondarySystemBackground))
         )
+    }
+}
+
+struct AddGiftHistorySheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var giftDescription: String = ""
+    @State private var occasion: String = "Birthday"
+    @State private var dateGiven: Date = Date()
+
+    let onSave: (String, String, Date) -> Void
+
+    private let occasions = ["Birthday", "Holiday", "Anniversary", "Just Because", "Other"]
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("What did you give?", text: $giftDescription)
+                } header: {
+                    Text("Gift")
+                } footer: {
+                    Text("E.g., \"Wireless headphones\" or \"Homemade cookies\"")
+                }
+
+                Section {
+                    Picker("Occasion", selection: $occasion) {
+                        ForEach(occasions, id: \.self) { occ in
+                            Text(occ).tag(occ)
+                        }
+                    }
+                    DatePicker("Date Given", selection: $dateGiven, in: ...Date(), displayedComponents: .date)
+                } header: {
+                    Text("Details")
+                }
+            }
+            .navigationTitle("Record a Gift")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        onSave(giftDescription, occasion, dateGiven)
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
+                    .disabled(giftDescription.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 

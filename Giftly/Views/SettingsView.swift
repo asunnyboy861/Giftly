@@ -19,12 +19,11 @@ struct SettingsView: View {
     @State private var showingImportPicker = false
     @State private var showingPaywall = false
     @State private var showingSupport = false
-    @State private var supportMessage: String = ""
 
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
-        return "Version \(version) (\(build))"
+        return "\(version) (\(build))"
     }
 
     var body: some View {
@@ -143,18 +142,38 @@ struct SettingsView: View {
 
     private var NotificationsSection: some View {
         Section {
-            Toggle("Birthday Reminders", isOn: .constant(UserDefaults.standard.bool(forKey: "notificationsEnabled")))
-                .disabled(true)
+            HStack {
+                Image(systemName: "bell.badge.fill")
+                    .foregroundStyle(Color("GiftlyPurple"))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Birthday Reminders")
+                    Text(notificationsEnabled ? "Enabled" : "Disabled")
+                        .font(.caption)
+                        .foregroundStyle(notificationsEnabled ? Color("GiftlyMint") : .secondary)
+                }
+                Spacer()
+                Button("Manage") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                .font(.subheadline)
+                .foregroundStyle(Color("GiftlyPurple"))
+            }
             NavigationLink {
                 NotificationSettingsView()
             } label: {
-                Label("Notification Settings", systemImage: "bell")
+                Label("Notification Settings", systemImage: "gearshape.arrow.2.circle")
             }
         } header: {
             Text("Notifications")
         } footer: {
-            Text("Reminders fire 7 days, 1 day, and on the day at 9 AM.")
+            Text("Reminders fire 7 days, 1 day, and on the day at 9 AM. Tap Manage to change permission in iOS Settings.")
         }
+    }
+
+    private var notificationsEnabled: Bool {
+        UserDefaults.standard.bool(forKey: "notificationsEnabled")
     }
 
     private var SupportSection: some View {
@@ -207,20 +226,23 @@ struct SettingsView: View {
     private var AboutSection: some View {
         Section {
             HStack {
-                Text("App")
+                Label("Giftly", systemImage: "gift.fill")
+                    .foregroundStyle(Color("GiftlyPurple"))
                 Spacer()
-                Text("Giftly")
+                Text(appVersion)
                     .foregroundStyle(.secondary)
             }
-            HStack {
-                Text(appVersion.components(separatedBy: " (").first ?? appVersion)
-                Spacer()
-                Text(appVersion.contains("(") ?
-                     "(\(appVersion.components(separatedBy: "(").last?.replacingOccurrences(of: ")", with: "") ?? ""))"
-                     : "")
-                    .foregroundStyle(.secondary)
+            if let url = appViewModel.supportURL() {
+                Link(destination: url) {
+                    HStack {
+                        Label("Help & FAQ", systemImage: "questionmark.circle")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
-            Link("Made with care", destination: URL(string: "https://asunnyboy861.github.io")!)
         } header: {
             Text("About")
         }
@@ -265,7 +287,7 @@ struct NotificationSettingsView: View {
             } header: {
                 Text("How Reminders Work")
             } footer: {
-                Text("Reminders repeat yearly. To disable, turn off Birthday Reminders in Settings.")
+                Text("Reminders repeat yearly. To change notification permission, use iOS Settings.")
             }
 
             Section {
@@ -274,6 +296,13 @@ struct NotificationSettingsView: View {
                     Spacer()
                     Text("\(pendingCount)")
                         .foregroundStyle(.secondary)
+                }
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    Label("Open iOS Settings", systemImage: "gear")
                 }
             } header: {
                 Text("Status")

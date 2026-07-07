@@ -134,7 +134,9 @@ struct OnboardingView: View {
             personViewModel.attach(context: modelContext)
         }
         .alert(
-            importResult?.denied == true ? "Contact Access Denied" : "Found \(importResult?.importedCount ?? 0) Birthdays!",
+            importResult?.denied == true ? "Contact Access Denied"
+            : (importResult?.importedCount ?? 0) > 0 ? "Birthdays Imported!"
+            : "No New Birthdays Found",
             isPresented: $showImportAlert
         ) {
             if importResult?.denied == true {
@@ -162,7 +164,7 @@ struct OnboardingView: View {
                 } else if result.importedCount > 0 {
                     Text("Successfully imported \(result.importedCount) birthday\(result.importedCount == 1 ? "" : "s") from your contacts. We'll remind you before each one!")
                 } else {
-                    Text("No new birthdays found in your contacts. You can add them manually later.")
+                    Text("No new birthdays found in your contacts. You can add them manually in the app.")
                 }
             }
         }

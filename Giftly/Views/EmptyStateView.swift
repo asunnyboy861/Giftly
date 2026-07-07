@@ -6,6 +6,8 @@ struct EmptyStateView: View {
     let message: String
     var actionTitle: String?
     var action: (() -> Void)?
+    var secondaryActionTitle: String?
+    var secondaryAction: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 24) {
@@ -37,6 +39,18 @@ struct EmptyStateView: View {
                 .tint(Color("GiftlyPurple"))
                 .padding(.horizontal, 32)
                 .padding(.top, 8)
+            }
+
+            if let secondaryActionTitle = secondaryActionTitle, let secondaryAction = secondaryAction {
+                Button(action: secondaryAction) {
+                    Text(secondaryActionTitle)
+                        .font(.subheadline.weight(.medium))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(.bordered)
+                .tint(Color("GiftlyPurple"))
+                .padding(.horizontal, 32)
             }
 
             Spacer()

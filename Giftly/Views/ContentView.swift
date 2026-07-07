@@ -112,7 +112,9 @@ struct ContentView: View {
                         title: "Never Forget a Birthday",
                         message: "Import birthdays from your contacts, or add them manually.",
                         actionTitle: "Import from Contacts",
-                        action: { startContactImport() }
+                        action: { startContactImport() },
+                        secondaryActionTitle: "Add Manually",
+                        secondaryAction: { attemptAddPerson() }
                     )
                 } else {
                     HomeContent
