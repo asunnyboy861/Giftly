@@ -17,6 +17,12 @@
         .footer { text-align: center; padding: 32px 20px; color: #888; font-size: 0.9rem; }
         .footer a { color: #7B68EE; text-decoration: none; margin: 0 8px; }
         .updated { font-style: italic; color: #888; margin-bottom: 20px; }
+        .highlight { border-left: 4px solid #34C759; background: #F2FFF4; }
+        .highlight h2 { color: #1d1d1f; }
+        .qa { margin-bottom: 14px; }
+        .qa .q { font-weight: 700; color: #1d1d1f; }
+        .qa .a { color: #444; }
+        .pill { display: inline-block; background: #34C759; color: #fff; padding: 2px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -25,12 +31,25 @@
         <p>Giftly — Birthday &amp; Gift Reminder</p>
     </div>
     <div class="container">
-        <p class="updated">Last updated: July 6, 2026</p>
+        <p class="updated">Last updated: July 13, 2026</p>
 
         <div class="section">
             <h2>Overview</h2>
             <p>Giftly is designed with privacy as a top priority. We believe your personal data — especially information about your friends and family — should never leave your device without your explicit consent.</p>
             <p><strong>Giftly does NOT collect, track, or share your personal data.</strong> There are no analytics, no advertising SDKs, and no third-party trackers in this app.</p>
+        </div>
+
+        <div class="section highlight">
+            <h2>Contacts Privacy — Direct Answers</h2>
+            <p>To be unambiguous about how Giftly handles your contacts:</p>
+            <div class="qa">
+                <p class="q">Do you upload the user's contacts to the server?</p>
+                <p class="a"><span class="pill">NO</span> Giftly does <strong>NOT</strong> upload user contacts to any server. Contacts are read locally on the device via Apple's <code>CNContactStore</code> framework, and only the fields needed by the app (name, birthday, photo) are copied into the app's local on-device SwiftData database. No network request is made that transmits contact data anywhere.</p>
+            </div>
+            <div class="qa">
+                <p class="q">Do you share the user's contacts to any third-party?</p>
+                <p class="a"><span class="pill">NO</span> Giftly does <strong>NOT</strong> share user contacts with any third-party. There are no analytics SDKs, no advertising networks, no data brokers, and no third-party APIs that receive contact information. The only network calls in the app are: (1) optional AI gift suggestions (see "AI Features" below), which send only the person's name, age, relationship, interests, and a budget range — never the full contact record and never your contacts list; and (2) an optional "Contact Support" form, which sends only the subject and message you type plus basic app diagnostics (version, iOS version, device model) — never contact data.</p>
+            </div>
         </div>
 
         <div class="section">
@@ -40,7 +59,7 @@
                 <li><strong>People you add:</strong> Name, birthday, photo, relationship, interests, notes, favorite status</li>
                 <li><strong>Gift ideas:</strong> Title, description, estimated price, status, search terms</li>
                 <li><strong>Gift history:</strong> Gift description, occasion, date given</li>
-                <li><strong>App preferences:</strong> Onboarding completion, notification settings</li>
+                <li><strong>App preferences:</strong> Onboarding completion, notification settings, free-tier AI usage counter</li>
             </ul>
             <p>This data never leaves your device. We do not have access to it, and we cannot see or recover it.</p>
         </div>
@@ -50,28 +69,33 @@
             <p>Giftly can import birthdays from your contacts to help you quickly add people. This feature is <strong>privacy-minimized</strong>:</p>
             <ul>
                 <li>We only access: <strong>name, birthday, and photo</strong></li>
-                <li>We do <strong>NOT</strong> access: phone numbers, email addresses, postal addresses, or any other contact fields</li>
-                <li>Contact data is only accessed when you explicitly choose to import</li>
-                <li>Imported data is stored locally on your device</li>
+                <li>We do <strong>NOT</strong> access: phone numbers, email addresses, postal addresses, social profiles, or any other contact fields</li>
+                <li>Contact data is only read when you explicitly tap "Import from Contacts" — never silently or in the background</li>
+                <li>Imported data is copied into the app's local on-device database and remains there; the original contact entry in iOS Contacts is not modified</li>
+                <li>Contact data is <strong>never transmitted over the network</strong></li>
             </ul>
             <p>You can revoke contact access at any time in iOS Settings → Giftly.</p>
         </div>
 
         <div class="section">
             <h2>Notifications</h2>
-            <p>Giftly sends local notifications for birthday reminders (7 days, 1 day, and on the day at 9 AM). These are <strong>local notifications</strong> — they are scheduled on your device and do not require a server connection. No push notification tokens are collected.</p>
+            <p>Giftly sends local notifications for birthday reminders (7 days, 1 day, and on the day at 9 AM). These are <strong>local notifications</strong> — they are scheduled on your device and do not require a server connection. No push notification tokens are collected and no push server is used.</p>
         </div>
 
         <div class="section">
-            <h2>API Key Storage (AI Feature)</h2>
-            <p>If you use the AI gift suggestion feature, you provide your own API key. This key is:</p>
+            <h2>AI Features</h2>
+            <p>Giftly offers AI-powered gift suggestions through two providers. In both cases, <strong>no contact record is ever uploaded</strong> — only a minimal context (the person's name, age, relationship, interests, and a budget range) is used to generate suggestions.</p>
+            <h3 style="margin: 16px 0 8px; font-size: 1.05rem;">1. Apple Intelligence (default, on-device)</h3>
+            <p>On iOS 26+ devices where Apple Intelligence is available, gift suggestions are generated <strong>on-device</strong> using Apple's FoundationModels framework. No data leaves the device. This is the default provider and includes 3 free suggestions per month.</p>
+            <h3 style="margin: 16px 0 8px; font-size: 1.05rem;">2. Bring Your Own Key (optional, advanced)</h3>
+            <p>If you choose to use a third-party AI provider (such as OpenAI), you provide your own API key. This key is:</p>
             <ul>
                 <li>Stored securely in <strong>Apple Keychain</strong> (encrypted, device-bound)</li>
                 <li><strong>Never</strong> stored in UserDefaults (plaintext)</li>
                 <li><strong>Never</strong> sent to our servers</li>
                 <li>Used only to make direct API calls from your device to your chosen AI provider</li>
             </ul>
-            <p>The app uses a "Bring Your Own Key" (BYO Key) model. We do not sell API keys or AI usage. Any API costs are paid directly by you to your chosen provider.</p>
+            <p>We do not sell API keys or AI usage. Any API costs are paid directly by you to your chosen provider. The only data sent to the AI provider is the minimal suggestion prompt described above — never the full contact record, never other people's data, and never your contacts list.</p>
         </div>
 
         <div class="section">
@@ -86,7 +110,9 @@
                 <li>We do <strong>NOT</strong> track you across apps or websites</li>
                 <li>We do <strong>NOT</strong> use advertising SDKs</li>
                 <li>We do <strong>NOT</strong> use third-party analytics (no Firebase, no Google Analytics, no Mixpanel)</li>
-                <li>We do <strong>NOT</strong> upload your data to any server</li>
+                <li>We do <strong>NOT</strong> upload your contacts to any server</li>
+                <li>We do <strong>NOT</strong> share your contacts with any third-party</li>
+                <li>We do <strong>NOT</strong> upload your data to any server (all data is stored locally on-device)</li>
                 <li>We do <strong>NOT</strong> sell or share your data with anyone</li>
                 <li>We do <strong>NOT</strong> access your contacts without your explicit permission</li>
             </ul>
@@ -94,7 +120,7 @@
 
         <div class="section">
             <h2>Data Export &amp; Deletion</h2>
-            <p>You can export all your data at any time: Settings → Export Backup (creates a JSON file).</p>
+            <p>You can export all your data at any time: Settings → Export Backup (creates a JSON file saved to a location you choose).</p>
             <p>You can delete all your data by: deleting the app from your device. This permanently removes all stored data.</p>
         </div>
 
