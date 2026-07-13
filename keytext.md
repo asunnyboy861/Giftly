@@ -2,7 +2,7 @@
 Birthday & Gift Reminder
 
 ## Promotional Text
-Never forget a birthday again. Smart reminders, gift tracker, and free AI suggestions - all for one low price. No subscriptions, ever.
+Never forget a birthday. Track gift ideas, get smart reminders, and plan thoughtful gifts - all with one-time pricing and no subscriptions.
 
 ## Description
 Giftly is the privacy-first birthday and gift reminder that helps you never forget the people who matter most. Track birthdays, plan gifts, and get smart reminders - all with one-time pricing and no subscriptions.
@@ -12,31 +12,24 @@ NEVER FORGET A BIRTHDAY
 - Yearly repeating reminders keep you on track forever
 - Actionable notifications with Call, Message, and Gift Ideas buttons
 - See today's birthdays and upcoming celebrations at a glance
-- Custom alert time so you get reminded when it works for you
 
 PLAN GIFTS LIKE A PRO
 - Capture gift ideas for every friend and family member on your list
-- Build a wish list of presents for every birthday, holiday, and party
 - Track each gift from Idea to Planned to Purchased to Given
 - Never accidentally repeat a present - your full gift history is one tap away
 - Set estimated budgets for every gift idea
-- The perfect gift tracker for birthdays, holidays, and special occasions
 
 AI GIFT SUGGESTIONS - FREE TO START
 - Stuck on what to buy? Let AI suggest thoughtful gifts
 - 3 free suggestions every month - no API key needed
-- Powered by Apple Intelligence (on-device, private)
+- Powered by Apple Intelligence on-device for maximum privacy
 - Set your budget and get 5 personalized suggestions instantly
-- Each suggestion includes a reason, price range, and search terms
-- Save any suggestion straight to your gift ideas list
 - Upgrade to unlimited AI suggestions with a one-time purchase
-- Advanced: bring your own API key for premium models (GPT-4o, Gemini, etc.)
 
 IMPORT BIRTHDAYS IN SECONDS
 - One tap to import birthdays from your Contacts
 - We only read names, birthdays, and photos - never phone numbers, emails, or addresses
 - Smart deduplication prevents duplicate entries
-- Perfect for family and friends - everyone's bday in one place
 
 BEAUTIFUL AND PRIVATE
 - All data stored locally on your device using SwiftData
@@ -62,10 +55,10 @@ PRIVACY FIRST
 - Privacy Policy: https://asunnyboy861.github.io/Giftly/privacy.html
 - Terms of Use: https://asunnyboy861.github.io/Giftly/terms.html
 
-Giftly was built by people who hate subscriptions as much as you do. One purchase, yours forever. Whether it is a birthday, holiday, or anniversary - Giftly helps you celebrate every special moment.
+Giftly was built by people who hate subscriptions as much as you do. One purchase, yours forever.
 
 ## Keywords
-countdown,calendar,tracker,ideas,wish list,notification,present,holiday,friends,family,ai,party,age,reminder,birthday,gift
+countdown,calendar,wishlist,notification,present,holiday,friends,family,party,age,reminder,gift
 
 ## What's New in This Version
 Welcome to Giftly! This is our first release.
@@ -75,7 +68,7 @@ FEATURES
 - Gift idea tracking with status: Idea, Planned, Purchased, Given
 - Gift history to prevent duplicate gifting
 - AI gift suggestions - 3 free per month, unlimited with one-time purchase
-- Powered by Apple Intelligence (on-device, private) - no API key needed
+- Powered by Apple Intelligence on-device - no API key needed
 - One-tap contact import (privacy-minimized - name, birthday, photo only)
 - Calendar view of all birthdays grouped by month
 - Actionable notifications with Call, Message, and Gift Ideas buttons
@@ -97,10 +90,10 @@ We built Giftly because we were tired of subscription-only birthday apps. Pay on
 Thank you for reviewing Giftly!
 
 CONTACTS PRIVACY (in response to Guideline 2.1 inquiry):
-- Do you upload the user's contacts to the server? NO. Contacts are read locally via Apple's CNContactStore and stored in the on-device SwiftData database. No network call transmits contact data. The only network calls in the app are optional AI suggestions (which send only the person's name, age, relationship, interests, budget — never the contact record or contacts list) and an optional support form (which sends only user-typed message + app diagnostics — never contact data).
-- Do you share the user's contacts to any third-party? NO. The app contains zero third-party SDKs (no analytics, no advertising, no tracking). No data broker, advertising network, or third-party API receives contact information. The default AI provider is Apple Intelligence (on-device, iOS 26+) — no data leaves the device. The optional BYO Key AI path sends only a minimal prompt (name, age, relationship, interests, budget) to the user's own chosen provider, never the full contact record.
+- Do you upload the user's contacts to the server? NO. Contacts are read locally via Apple's CNContactStore and stored in the on-device SwiftData database. No network call transmits contact data. The only network calls in the app are optional AI suggestions (which send only the person's name, age, relationship, interests, budget - never the contact record or contacts list) and an optional support form (which sends only user-typed message + app diagnostics - never contact data).
+- Do you share the user's contacts to any third-party? NO. The app contains zero third-party SDKs (no analytics, no advertising, no tracking). No data broker, advertising network, or third-party API receives contact information. The default AI provider is Apple Intelligence (on-device, iOS 26+) - no data leaves the device. The optional BYO Key AI path sends only a minimal prompt (name, age, relationship, interests, budget) to the user's own chosen provider, never the full contact record.
 - Privacy manifest (PrivacyInfo.xcprivacy) declares NSPrivacyTracking: false and an empty NSPrivacyCollectedDataTypes array.
-- Updated Privacy Policy with a dedicated "Contacts Privacy — Direct Answers" section: https://asunnyboy861.github.io/Giftly/privacy.html
+- Updated Privacy Policy with a dedicated "Contacts Privacy - Direct Answers" section: https://asunnyboy861.github.io/Giftly/privacy.html
 
 TESTING THE APP (Free Tier):
 1. Add up to 5 birthdays manually - tap the + button on the Home tab
