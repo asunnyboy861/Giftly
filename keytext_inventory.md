@@ -13,8 +13,7 @@
 | Birthday Reminders (3-tier) | `NotificationService.swift` - scheduleBirthdayReminders() | IMPLEMENTED | free (day-of), pro (7d,1d) | "Get a countdown to every birthday with 7-day, 1-day, and day-of reminders" |
 | Gift Idea Tracking | `GiftIdea.swift` + `GiftIdeaListView.swift` + `GiftViewModel.swift` | IMPLEMENTED | pro | "Track each gift from Idea to Planned to Purchased to Given" |
 | Gift History | `GiftHistory.swift` + `PersonDetailView.swift` | IMPLEMENTED | pro | "Never accidentally repeat a present - your full gift history is one tap away" |
-| AI Gift Suggestions (Apple Intelligence) | `AppleIntelligenceService.swift` + `AIUsageTracker.swift` | IMPLEMENTED | free (3/month), ai addon (unlimited) | "3 free suggestions every month - no API key needed" |
-| AI Gift Suggestions (BYO Key) | `GiftAIService.swift` + `KeychainHelper.swift` | IMPLEMENTED | ai addon | "Optional: bring your own API key for premium models" |
+| AI Gift Suggestions (Apple Intelligence) | `AppleIntelligenceService.swift` + `AIUsageTracker.swift` | IMPLEMENTED | free (3/month), ai addon (unlimited) | "3 free suggestions every month - Powered by Apple Intelligence on-device" |
 | Contact Import | `ContactImportService.swift` | IMPLEMENTED | pro | "One tap to import birthdays from your Contacts" |
 | Calendar View | `CalendarView.swift` | IMPLEMENTED | free | "Full calendar view to see every birthday at a glance" |
 | Person Detail View | `PersonDetailView.swift` | IMPLEMENTED | free | "Person detail view with age, zodiac sign, and gift history" |
@@ -24,7 +23,7 @@
 | Search & Favorites | `ContentView.swift` + `Person.swift` isFavorite | IMPLEMENTED | free | "Search birthdays by name, Star favorites for quick access" |
 | Onboarding | `OnboardingView.swift` | IMPLEMENTED | free | 3-page welcome + contact import option |
 | IAP: Pro Unlock | `PurchaseService.swift` - com.zzoutuo.Giftly.prounlock | IMPLEMENTED | $4.99 one-time | "Unlimited birthdays, contact import, gift tracking, data export" |
-| IAP: AI Add-on | `PurchaseService.swift` - com.zzoutuo.Giftly.aiunlock | IMPLEMENTED | $5.99 one-time | "Unlimited AI gift suggestions - no API key needed" |
+| IAP: AI Add-on | `PurchaseService.swift` - com.zzoutuo.Giftly.aiunlock | IMPLEMENTED | $5.99 one-time | "Unlimited AI gift suggestions - powered by Apple Intelligence" |
 
 ## Document-Code Conflict Resolution
 
@@ -32,7 +31,8 @@
 |---|---------------------------|----------------------|------------|----------------------|
 | 1 | `price.md` lists "AI gift suggestions" under AI Advanced only | `AppleIntelligenceService.swift` + `AIUsageTracker.swift` implement free tier (3/month) via Apple Intelligence | Code wins: Free tier 3/month exists | Added "3 free suggestions every month" to Description |
 | 2 | `us.md` mentions Widget feature | No Widget Extension target found in project | Code wins: Widget not implemented | Removed widget mention from Description |
-| 3 | None other | - | - | - |
+| 3 | `us.md` / `price.md` mention BYO API Key model | `GiftAIService.swift` deleted; only Apple Intelligence path remains | Code wins: BYO Key removed for App Store compliance | Removed all API key / BYO / third-party AI references from keytext.md and docs |
+| 4 | None other | - | - | - |
 
 ## ASO Keyword Evidence
 
