@@ -12,20 +12,41 @@ struct ContentView: View {
     @StateObject private var purchaseService = PurchaseService.shared
 
     @State private var selectedTab = 0
-    @State private var showingAddPerson = false
-    @State private var showingPaywall = false
+    @State private var activeSheet: ActiveSheet?
     @State private var importInProgress = false
     @State private var importResult: PersonViewModel.ContactImportResult?
     @State private var deepLinkPersonId: String?
     @State private var deepLinkPerson: Person?
 
+    private enum ActiveSheet: Identifiable {
+        case addPerson
+        case paywall
+        case editPerson(Person)
+
+        var id: String {
+            switch self {
+            case .addPerson: return "addPerson"
+            case .paywall: return "paywall"
+            case .editPerson(let person): return "editPerson-\(person.id.uuidString)"
+            }
+        }
+    }
+
     var body: some View {
         TabView(selection: $selectedTab) {
-            HomeView
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
-                .tag(0)
+            HomeView(
+                activeSheet: $activeSheet,
+                deepLinkPerson: $deepLinkPerson,
+                importInProgress: $importInProgress,
+                importResult: $importResult,
+                personViewModel: personViewModel,
+                giftViewModel: giftViewModel,
+                purchaseService: purchaseService
+            )
+            .tabItem {
+                Label("Home", systemImage: "house.fill")
+            }
+            .tag(0)
 
             CalendarView()
                 .tabItem {
@@ -50,11 +71,17 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: NotificationDelegate.deepLinkNotification)) { note in
             handleDeepLink(note)
         }
-        .sheet(isPresented: $showingAddPerson) {
-            AddPersonView()
-        }
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView()
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .addPerson:
+                AddPersonView()
+                    .environment(personViewModel)
+            case .paywall:
+                PaywallView()
+            case .editPerson(let person):
+                AddPersonView(person: person)
+                    .environment(personViewModel)
+            }
         }
         .alert("Import Complete", isPresented: Binding(
             get: { importResult != nil && importResult!.importedCount > 0 && importResult!.skippedDueToLimit == 0 && !importResult!.denied },
@@ -71,7 +98,7 @@ struct ContentView: View {
             set: { if !$0 { importResult = nil } }
         )) {
             Button("Upgrade to Pro") {
-                showingPaywall = true
+                activeSheet = .paywall
                 importResult = nil
             }
             Button("OK", role: .cancel) { importResult = nil }
@@ -103,155 +130,183 @@ struct ContentView: View {
         }
     }
 
-    private var HomeView: some View {
-        NavigationStack {
-            Group {
-                if people.isEmpty {
-                    EmptyStateView(
-                        icon: "gift.fill",
-                        title: "Never Forget a Birthday",
-                        message: "Import birthdays from your contacts, or add them manually.",
-                        actionTitle: "Import from Contacts",
-                        action: { startContactImport() },
-                        secondaryActionTitle: "Add Manually",
-                        secondaryAction: { attemptAddPerson() }
-                    )
-                } else {
-                    HomeContent
+    private struct HomeView: View {
+        @Binding var activeSheet: ActiveSheet?
+        @Binding var deepLinkPerson: Person?
+        @Binding var importInProgress: Bool
+        @Binding var importResult: PersonViewModel.ContactImportResult?
+
+        @Query(sort: [SortDescriptor(\Person.birthday)]) private var people: [Person]
+
+        let personViewModel: PersonViewModel
+        let giftViewModel: GiftViewModel
+        let purchaseService: PurchaseService
+
+        var body: some View {
+            NavigationStack {
+                Group {
+                    if people.isEmpty {
+                        EmptyStateView(
+                            icon: "gift.fill",
+                            title: "Never Forget a Birthday",
+                            message: "Import birthdays from your contacts, or add them manually.",
+                            actionTitle: "Import from Contacts",
+                            action: { startContactImport() },
+                            secondaryActionTitle: "Add Manually",
+                            secondaryAction: { attemptAddPerson() }
+                        )
+                    } else {
+                        HomeContent(
+                            people: people,
+                            personViewModel: personViewModel,
+                            purchaseService: purchaseService,
+                            activeSheet: $activeSheet
+                        )
+                    }
                 }
-            }
-            .navigationTitle("Giftly")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        startContactImport()
-                    } label: {
-                        if importInProgress {
-                            ProgressView()
-                        } else {
-                            Image(systemName: "person.2.badge.gearshape")
+                .navigationTitle("Giftly")
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            startContactImport()
+                        } label: {
+                            if importInProgress {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "person.2.badge.gearshape")
+                            }
                         }
+                        .disabled(importInProgress)
                     }
-                    .disabled(importInProgress)
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            attemptAddPerson()
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                        .accessibilityIdentifier("addPersonButton")
+                    }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        attemptAddPerson()
+                .sheet(item: $deepLinkPerson) { person in
+                    NavigationStack {
+                        PersonDetailView(person: person)
+                    }
+                    .environment(personViewModel)
+                    .environment(giftViewModel)
+                }
+            }
+        }
+
+        private func attemptAddPerson() {
+            if personViewModel.canAddPerson(currentCount: people.count, isProUnlocked: purchaseService.isProUnlocked) {
+                activeSheet = .addPerson
+            } else {
+                activeSheet = .paywall
+            }
+        }
+
+        private func startContactImport() {
+            importInProgress = true
+            Task {
+                let result = await personViewModel.importFromContacts(
+                    existingPeople: people,
+                    isProUnlocked: purchaseService.isProUnlocked
+                )
+                importInProgress = false
+                importResult = result
+            }
+        }
+    }
+
+    private struct HomeContent: View {
+        let people: [Person]
+        let personViewModel: PersonViewModel
+        let purchaseService: PurchaseService
+        @Binding var activeSheet: ActiveSheet?
+
+        var body: some View {
+            ScrollView {
+                VStack(spacing: 20) {
+                    if !personViewModel.todaysBirthdays(from: people).isEmpty {
+                        SectionTodayBirthdays
+                    }
+
+                    SectionUpcoming
+
+                    if people.count >= PersonViewModel.freeTierLimit && !purchaseService.isProUnlocked {
+                        UpgradeBanner
+                    }
+                }
+                .padding()
+            }
+            .background(Color(.systemGroupedBackground))
+        }
+
+        private var SectionTodayBirthdays: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: "party.popper.fill")
+                        .foregroundStyle(Color("GiftlyCoral"))
+                    Text("Today's Birthdays")
+                        .font(.title3.weight(.semibold))
+                }
+                ForEach(personViewModel.todaysBirthdays(from: people)) { person in
+                    NavigationLink {
+                        PersonDetailView(person: person)
                     } label: {
-                        Image(systemName: "plus")
+                        BirthdayCardView(person: person, isToday: true)
                     }
-                }
-            }
-            .sheet(item: $deepLinkPerson) { person in
-                NavigationStack {
-                    PersonDetailView(person: person)
+                    .buttonStyle(PressableCardStyle())
                 }
             }
         }
-    }
 
-    private var HomeContent: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                if !personViewModel.todaysBirthdays(from: people).isEmpty {
-                    SectionTodayBirthdays
+        private var SectionUpcoming: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: "calendar.badge.clock")
+                        .foregroundStyle(Color("GiftlyPurple"))
+                    Text("Upcoming Birthdays")
+                        .font(.title3.weight(.semibold))
                 }
-
-                SectionUpcoming
-
-                if people.count >= PersonViewModel.freeTierLimit && !purchaseService.isProUnlocked {
-                    UpgradeBanner
+                ForEach(personViewModel.upcomingBirthdays(from: people, limit: 10)) { person in
+                    NavigationLink {
+                        PersonDetailView(person: person)
+                    } label: {
+                        BirthdayCardView(person: person, isToday: false)
+                    }
+                    .buttonStyle(PressableCardStyle())
                 }
-            }
-            .padding()
-        }
-        .background(Color(.systemGroupedBackground))
-    }
-
-    private var SectionTodayBirthdays: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "party.popper.fill")
-                    .foregroundStyle(Color("GiftlyCoral"))
-                Text("Today's Birthdays")
-                    .font(.title3.weight(.semibold))
-            }
-            ForEach(personViewModel.todaysBirthdays(from: people)) { person in
-                NavigationLink {
-                    PersonDetailView(person: person)
-                } label: {
-                    BirthdayCardView(person: person, isToday: true)
-                }
-                .buttonStyle(PressableCardStyle())
             }
         }
-    }
 
-    private var SectionUpcoming: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "calendar.badge.clock")
-                    .foregroundStyle(Color("GiftlyPurple"))
-                Text("Upcoming Birthdays")
-                    .font(.title3.weight(.semibold))
-            }
-            ForEach(personViewModel.upcomingBirthdays(from: people, limit: 10)) { person in
-                NavigationLink {
-                    PersonDetailView(person: person)
-                } label: {
-                    BirthdayCardView(person: person, isToday: false)
-                }
-                .buttonStyle(PressableCardStyle())
-            }
-        }
-    }
-
-    private var UpgradeBanner: some View {
-        Button {
-            showingPaywall = true
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "star.fill")
-                    .font(.title2)
-                    .foregroundStyle(.white)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Unlock Unlimited Birthdays")
-                        .font(.subheadline.weight(.bold))
+        private var UpgradeBanner: some View {
+            Button {
+                activeSheet = .paywall
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "star.fill")
+                        .font(.title2)
                         .foregroundStyle(.white)
-                    Text("Free tier limited to \(PersonViewModel.freeTierLimit) people. Upgrade for unlimited.")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.9))
-                        .multilineTextAlignment(.leading)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Unlock Unlimited Birthdays")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(.white)
+                        Text("Free tier limited to \(PersonViewModel.freeTierLimit) people. Upgrade for unlimited.")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.9))
+                            .multilineTextAlignment(.leading)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(.white)
                 }
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.white)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color("GiftlyPurple").gradient)
+                )
             }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color("GiftlyPurple").gradient)
-            )
-        }
-    }
-
-    private func attemptAddPerson() {
-        if personViewModel.canAddPerson(currentCount: people.count, isProUnlocked: purchaseService.isProUnlocked) {
-            showingAddPerson = true
-        } else {
-            showingPaywall = true
-        }
-    }
-
-    private func startContactImport() {
-        importInProgress = true
-        Task {
-            let result = await personViewModel.importFromContacts(
-                existingPeople: people,
-                isProUnlocked: purchaseService.isProUnlocked
-            )
-            importInProgress = false
-            importResult = result
         }
     }
 

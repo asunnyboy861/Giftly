@@ -124,6 +124,12 @@ final class DataExportService {
         }
 
         try context.save()
+
+        let allPeople = try context.fetch(FetchDescriptor<Person>())
+        for person in allPeople {
+            NotificationService.shared.cancelReminders(for: person.id)
+            NotificationService.shared.scheduleBirthdayReminders(for: person)
+        }
     }
 
     func saveExportToFile(_ data: Data, filename: String = "GiftlyBackup") -> URL? {

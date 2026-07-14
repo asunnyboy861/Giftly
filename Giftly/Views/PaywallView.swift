@@ -54,7 +54,7 @@ struct PaywallView: View {
             FeatureRow(icon: "bell.badge.fill", text: "Yearly reminders for every birthday")
             FeatureRow(icon: "gift.fill", text: "Gift idea lists with status tracking")
             FeatureRow(icon: "square.and.arrow.up.fill", text: "Export & import backup data")
-            FeatureRow(icon: "wand.and.stars", text: "AI gift suggestions (AI Add-on)")
+            FeatureRow(icon: "sparkles", text: "AI suggestions: 3 free/month, unlimited with Add-on")
         }
         .padding()
         .background(
@@ -82,7 +82,7 @@ struct PaywallView: View {
                 PurchaseCard(
                     product: product,
                     title: "AI Add-on",
-                    subtitle: "Unlock AI gift suggestions forever",
+                    subtitle: "Unlimited AI suggestions - powered by Apple Intelligence",
                     icon: "wand.and.stars",
                     color: "GiftlyCoral",
                     isPurchased: purchaseService.isAIUnlocked,

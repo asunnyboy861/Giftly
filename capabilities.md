@@ -38,21 +38,20 @@
 
 ### 🟢 App Store Connect 审核信息配置（⚠️ 上架必需 — AI功能必备）
 
-**影响功能**：不配置则Apple审核员无法测试AI功能，导致 Guideline 2.1(a) 拒绝
+**影响功能**：不配置则Apple审核员缺少测试指引，可能导致 Guideline 2.1(a) 拒绝
 **当前状态**：app_review_info.md 已生成，包含完整审核说明
 
 **配置步骤**：
 1. 在 App Store Connect → Giftly → **App Review Information**
 2. 在 **Demo Account** 字段中，注明：
-   - 本App使用BYO Key模式，无需Demo账户
-   - 免费版本可立即测试（最多5个生日联系人）
+   - 本App无需Demo账户，免费版本可立即测试（最多5个生日联系人）
    - IAP测试请使用Sandbox Tester账户
 3. 在 **Notes** 字段中，粘贴 `app_review_info.md` 中的完整内容（位于项目根目录）
 4. ⚠️ **AI功能测试关键说明**（必须包含在Notes中）：
-   - 本App使用Bring Your Own API Key模式
-   - 审核员需购买AI Advanced ($5.99 IAP) 后，在Settings输入一个兼容ChatCompletions格式的API Key
-   - API Key存储在iOS Keychain，永不离开设备
-   - 无免费生成次数限制 — 用户添加自己的Key后可无限次生成
+   - 本App使用Apple Intelligence (iOS 26+) 在设备端生成AI建议
+   - 审核员需在iOS 26+且已启用Apple Intelligence的设备或模拟器上测试
+   - 免费用户每月可使用3次AI建议；购买AI Advanced ($5.99 IAP) 后无限制
+   - AI处理完全在设备端进行，不调用任何外部AI API，不传输任何用户数据
 5. ⚠️ 确保 **Privacy Policy URL** 字段填写：`https://asunnyboy861.github.io/Giftly/privacy.html`
 6. ⚠️ 确保 **Terms of Use URL** 字段填写（EULA字段）：`https://asunnyboy861.github.io/Giftly/terms.html`
 
@@ -107,7 +106,7 @@
 | Contacts Framework | 已通过 `INFOPLIST_KEY_NSContactsUsageDescription` 配置（Debug+Release） | ✅ 已配置 |
 | UserNotifications | 运行时权限请求，无需entitlement | ✅ 已配置 |
 | StoreKit 2 | 框架自动链接（`import StoreKit`），IAP代码就绪 | ✅ 已配置 |
-| Keychain (Security) | 框架自动链接，API Key存储就绪 | ✅ 已配置 |
+| Keychain (Security) | Framework auto-linked (not used for external API key storage) | ✅ 已配置 |
 | SwiftData | iOS 17+框架，`import SwiftData` 即可 | ✅ 已配置 |
 | Outgoing Network Connections | AI建议和客服反馈需要，已配置 | ✅ 已配置 |
 
@@ -150,14 +149,14 @@
 | Views | ContentView, OnboardingView, BirthdayCardView, CalendarView, AddPersonView, PersonDetailView, GiftIdeaListView, GiftSuggestionView, PaywallView, SettingsView, ContactSupportView, EmptyStateView | ✅ 已完成 |
 | MVVM架构 | @Observable ViewModels + ObservableObject PurchaseService (IAP合规) | ✅ 已完成 |
 | StoreKit 2 | PurchaseService.swift 实现完整IAP流程（购买/恢复/监听） | ✅ 已完成 |
-| AI Module | GiftAIService.swift (BYO Key, KeychainHelper, 自定义baseURL/model) | ✅ 已完成 |
-| 隐私合规 | 13项ios-custom-ai-config检查全部通过 | ✅ 已完成 |
-| 中国合规 | 用户界面无"OpenAI"/"ChatGPT"引用 | ✅ 已完成 |
+| AI Module | AppleIntelligenceService.swift (on-device, FoundationModels framework, iOS 26+) | ✅ 已完成 |
+| 隐私合规 | 无第三方SDK，无追踪，所有数据本地存储 | ✅ 已完成 |
+| 中国合规 | 用户界面和元数据无"OpenAI"/"ChatGPT"/第三方AI品牌引用 | ✅ 已完成 |
 | QA迭代 | improvement_plan_1.md (8.9/10评分，23/23功能实现) | ✅ 已完成 |
 
 ### 💡 使用提示（非开发者配置，App内操作即可）
 
-**AI 功能**：App 已内置 AI 配置界面，用户下载后在 **Settings → API Key** 中输入自己的兼容ChatCompletions格式的API Key即可使用。支持自定义Base URL和模型名称，可用于任何兼容提供商。这不是开发者配置步骤，用户按需在 App 内操作即可。API Key存储在iOS Keychain中，永不离开设备。
+**AI 功能**：App 使用 Apple Intelligence 在设备端生成礼物建议。用户下载后无需任何配置；在 iOS 26+ 且已启用 Apple Intelligence 的设备上打开任意联系人详情页，点击 "AI Ideas" 即可使用。免费用户每月3次建议，购买 AI Add-on 后无限制。所有AI处理在设备端完成，不传输任何数据。
 
 ### 部署
 
@@ -185,7 +184,7 @@ Based on operation guide analysis, the following capabilities are required:
 | "通讯录导入" / "Contacts" | Contact import feature | Contacts Framework |
 | "通知" / "notification" / "提醒" | 3-tier birthday reminders | UserNotifications |
 | "购买" / "内购" / "IAP" | $4.99 + $5.99 one-time purchases | StoreKit 2 / In-App Purchase |
-| "Keychain" / "API Key" | BYO OpenAI API key storage | Keychain (Security framework) |
+| "Apple Intelligence" / "AI" | On-device AI gift suggestions | FoundationModels framework (iOS 26+) |
 | "小组件" / "Widget" | Home screen widget | WidgetKit Extension |
 | "SwiftData" / "本地存储" | Local data storage | SwiftData (iOS 17+) |
 | "App Groups" | Shared container for widget | App Groups |
@@ -215,6 +214,7 @@ Created in PHASE 4+5. Declares:
 - **Sign in with Apple**: No account system — app is accountless
 - **Siri**: Not in MVP
 - **Apple Watch**: Not in MVP (planned for v1.2)
+- **Third-party AI providers / external API keys**: Not used — AI runs on-device via Apple Intelligence only
 
 ### Verification
 

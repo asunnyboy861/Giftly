@@ -34,6 +34,31 @@ final class GiftlyUITests: XCTestCase {
     }
 
     @MainActor
+    func testAddPersonButtonOpensSheetAndTextFieldAcceptsInput() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let addButton = app.buttons["addPersonButton"]
+        XCTAssertTrue(addButton.waitForExistence(timeout: 5), "Add person button should exist")
+        addButton.tap()
+
+        let fullNameField = app.textFields["Full name"]
+        XCTAssertTrue(fullNameField.waitForExistence(timeout: 5), "Full name text field should appear")
+
+        fullNameField.tap()
+        fullNameField.typeText("Test Name")
+
+        XCTAssertEqual(fullNameField.value as? String, "Test Name", "Full name field should contain entered text")
+
+        let saveButton = app.buttons["Save"]
+        XCTAssertTrue(saveButton.waitForExistence(timeout: 5), "Save button should exist")
+        saveButton.tap()
+
+        let personCell = app.staticTexts["Test Name"]
+        XCTAssertTrue(personCell.waitForExistence(timeout: 5), "Created person should appear in the list")
+    }
+
+    @MainActor
     func testLaunchPerformance() throws {
         // This measures how long it takes to launch your application.
         measure(metrics: [XCTApplicationLaunchMetric()]) {

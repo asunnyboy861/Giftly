@@ -19,7 +19,7 @@ final class AppleIntelligenceService {
             case .modelNotReady:
                 return "Apple Intelligence model is still downloading. Check Settings > Apple Intelligence & Siri."
             default:
-                return "Apple Intelligence is not available on this device. You can add your own API key in Settings."
+                return "Apple Intelligence is not available on this device. AI gift suggestions require iOS 26 or later with Apple Intelligence enabled."
             }
         default:
             return "Apple Intelligence is not available on this device."
@@ -32,7 +32,7 @@ final class AppleIntelligenceService {
         budgetMax: Double
     ) async throws -> [GiftSuggestion] {
         guard isAvailable else {
-            throw GiftAIError.apiError("Apple Intelligence is not available. Please add your API key in Settings.")
+            throw GiftAIError.apiError("Apple Intelligence is not available. AI gift suggestions require iOS 26 or later with Apple Intelligence enabled.")
         }
 
         let prompt = """

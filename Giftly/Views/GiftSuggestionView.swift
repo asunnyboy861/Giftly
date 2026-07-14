@@ -11,9 +11,20 @@ struct GiftSuggestionView: View {
     @State private var budgetMin: Double = 20
     @State private var budgetMax: Double = 80
     @State private var hasGenerated: Bool = false
+    @State private var appleAICheck: Bool = false
+    @State private var showingPaywall = false
 
     private var canGenerate: Bool {
-        purchaseService.isAIUnlocked && GiftAIService.shared.hasAPIKey
+        appleAICheck
+    }
+
+    private var isUnlimited: Bool {
+        purchaseService.isAIUnlocked
+    }
+
+    private var remainingUses: Int {
+        if isUnlimited { return -1 }
+        return AIUsageTracker.shared.remainingFreeUses
     }
 
     var body: some View {
@@ -23,6 +34,7 @@ struct GiftSuggestionView: View {
                     if !canGenerate {
                         LockedState
                     } else {
+                        UsageBanner
                         BudgetCard
                         if giftViewModel.isLoading {
                             LoadingCard
@@ -47,31 +59,67 @@ struct GiftSuggestionView: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .onAppear {
+                if #available(iOS 26, *) {
+                    appleAICheck = AppleIntelligenceService.shared.isAvailable
+                } else {
+                    appleAICheck = false
+                }
+            }
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView()
+            }
         }
+    }
+
+    private var UsageBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: isUnlimited ? "infinity.circle.fill" : "sparkles")
+                .foregroundStyle(isUnlimited ? Color("GiftlyMint") : Color("GiftlyCoral"))
+            if isUnlimited {
+                Text("Unlimited AI suggestions")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Color("GiftlyMint"))
+            } else {
+                Text("\(remainingUses) of \(AIUsageTracker.shared.freeTierLimitValue) free suggestions remaining this month")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            if !isUnlimited {
+                Button("Upgrade") {
+                    showingPaywall = true
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color("GiftlyPurple"))
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(isUnlimited ? Color("GiftlyMint").opacity(0.1) : Color(.tertiarySystemBackground))
+        )
     }
 
     private var LockedState: some View {
         VStack(spacing: 16) {
-            Image(systemName: "lock.fill")
+            Image(systemName: "apple.intelligence")
                 .font(.system(size: 56))
                 .foregroundStyle(Color("GiftlyCoral").gradient)
-            Text("Unlock AI Suggestions")
+            Text("Apple Intelligence Required")
                 .font(.title3.weight(.bold))
-            Text("Get personalized gift ideas powered by AI. Add your API key in Settings to get started.")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            NavigationLink {
-                SettingsView()
-            } label: {
-                Text("Open Settings")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+            if #available(iOS 26, *) {
+                Text("Apple Intelligence is not ready yet on this device. Check Settings > Apple Intelligence & Siri, then try again.")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            } else {
+                Text("AI gift suggestions require iOS 26 or later with Apple Intelligence enabled.")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Color("GiftlyPurple"))
-            .padding(.horizontal)
         }
         .padding()
     }
@@ -215,7 +263,7 @@ struct GiftSuggestionView: View {
             for: person,
             budgetMin: budgetMin,
             budgetMax: budgetMax,
-            canGenerate: canGenerate
+            isAIUnlocked: isUnlimited
         )
     }
 }
@@ -265,9 +313,9 @@ struct SuggestionCard: View {
                 .tint(Color("GiftlyMint"))
                 .disabled(added)
 
-                if let searchURL = amazonSearchURL(suggestion.searchTerms) {
+                if let searchURL = webSearchURL(suggestion.searchTerms) {
                     Link(destination: searchURL) {
-                        Label("Search", systemImage: "cart.fill")
+                        Label("Search", systemImage: "magnifyingglass")
                             .font(.caption.weight(.medium))
                     }
                     .buttonStyle(.bordered)
@@ -282,9 +330,9 @@ struct SuggestionCard: View {
         )
     }
 
-    private func amazonSearchURL(_ terms: String) -> URL? {
+    private func webSearchURL(_ terms: String) -> URL? {
         let encoded = terms.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? terms
-        return URL(string: "https://www.amazon.com/s?k=\(encoded)")
+        return URL(string: "https://www.google.com/search?q=\(encoded)")
     }
 }
 

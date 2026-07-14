@@ -32,8 +32,16 @@ final class ContactImportService: @unchecked Sendable {
                 var collected: [Person] = []
                 do {
                     try store.enumerateContacts(with: request) { contact, _ in
-                        guard let birthdayComponents = contact.birthday,
-                              let birthday = Calendar.current.date(from: birthdayComponents) else {
+                        guard let birthdayComponents = contact.birthday else {
+                            return
+                        }
+
+                        let calendar = Calendar.current
+                        var adjustedComponents = birthdayComponents
+                        if adjustedComponents.year == nil {
+                            adjustedComponents.year = 2000
+                        }
+                        guard let birthday = calendar.date(from: adjustedComponents) else {
                             return
                         }
 

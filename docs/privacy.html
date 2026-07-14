@@ -48,7 +48,7 @@
             </div>
             <div class="qa">
                 <p class="q">Do you share the user's contacts to any third-party?</p>
-                <p class="a"><span class="pill">NO</span> Giftly does <strong>NOT</strong> share user contacts with any third-party. There are no analytics SDKs, no advertising networks, no data brokers, and no third-party APIs that receive contact information. The only network calls in the app are: (1) optional AI gift suggestions (see "AI Features" below), which send only the person's name, age, relationship, interests, and a budget range — never the full contact record and never your contacts list; and (2) an optional "Contact Support" form, which sends only the subject and message you type plus basic app diagnostics (version, iOS version, device model) — never contact data.</p>
+                <p class="a"><span class="pill">NO</span> Giftly does <strong>NOT</strong> share user contacts with any third-party. There are no analytics SDKs, no advertising networks, no data brokers, and no third-party APIs that receive contact information. The only network call in the app is the optional "Contact Support" form, which sends only the subject and message you type plus basic app diagnostics (version, iOS version, device model) — never contact data.</p>
             </div>
         </div>
 
@@ -84,18 +84,14 @@
 
         <div class="section">
             <h2>AI Features</h2>
-            <p>Giftly offers AI-powered gift suggestions through two providers. In both cases, <strong>no contact record is ever uploaded</strong> — only a minimal context (the person's name, age, relationship, interests, and a budget range) is used to generate suggestions.</p>
-            <h3 style="margin: 16px 0 8px; font-size: 1.05rem;">1. Apple Intelligence (default, on-device)</h3>
-            <p>On iOS 26+ devices where Apple Intelligence is available, gift suggestions are generated <strong>on-device</strong> using Apple's FoundationModels framework. No data leaves the device. This is the default provider and includes 3 free suggestions per month.</p>
-            <h3 style="margin: 16px 0 8px; font-size: 1.05rem;">2. Bring Your Own Key (optional, advanced)</h3>
-            <p>If you choose to use a third-party AI provider (such as OpenAI), you provide your own API key. This key is:</p>
+            <p>Giftly offers AI-powered gift suggestions using <strong>Apple Intelligence</strong>, which runs entirely <strong>on-device</strong>. No contact record is ever uploaded. No data leaves the device.</p>
             <ul>
-                <li>Stored securely in <strong>Apple Keychain</strong> (encrypted, device-bound)</li>
-                <li><strong>Never</strong> stored in UserDefaults (plaintext)</li>
-                <li><strong>Never</strong> sent to our servers</li>
-                <li>Used only to make direct API calls from your device to your chosen AI provider</li>
+                <li>AI suggestions are generated on-device using Apple's FoundationModels framework (iOS 26+)</li>
+                <li><strong>No setup or account is required</strong></li>
+                <li><strong>No third-party AI provider is used</strong></li>
+                <li>No network request is made for AI suggestions</li>
+                <li>The free tier includes 3 suggestions per month; the AI Add-on unlocks unlimited suggestions</li>
             </ul>
-            <p>We do not sell API keys or AI usage. Any API costs are paid directly by you to your chosen provider. The only data sent to the AI provider is the minimal suggestion prompt described above — never the full contact record, never other people's data, and never your contacts list.</p>
         </div>
 
         <div class="section">

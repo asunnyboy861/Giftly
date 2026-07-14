@@ -53,12 +53,15 @@ struct PersonDetailView: View {
         }
         .sheet(isPresented: $showingEdit) {
             AddPersonView(person: person)
+                .environment(personViewModel)
         }
         .sheet(isPresented: $showingGiftIdeas) {
             GiftIdeaListView(person: person)
+                .environment(giftViewModel)
         }
         .sheet(isPresented: $showingAISuggestions) {
             GiftSuggestionView(person: person)
+                .environment(giftViewModel)
         }
         .sheet(isPresented: $showingPaywall) {
             PaywallView()
@@ -227,10 +230,23 @@ struct PersonDetailView: View {
 
                 Button {
                     UISelectionFeedbackGenerator().selectionChanged()
-                    if purchaseService_canUseAI {
+                    let appleAIAvailable: Bool = {
+                        if #available(iOS 26, *) {
+                            return AppleIntelligenceService.shared.isAvailable
+                        } else {
+                            return false
+                        }
+                    }()
+                    if purchaseService.isAIUnlocked {
                         showingAISuggestions = true
+                    } else if appleAIAvailable {
+                        if AIUsageTracker.shared.isFreeTierExhausted {
+                            showingPaywall = true
+                        } else {
+                            showingAISuggestions = true
+                        }
                     } else {
-                        showingPaywall = true
+                        showingAISuggestions = true
                     }
                 } label: {
                     Label("AI Ideas", systemImage: "wand.and.stars")
@@ -250,10 +266,6 @@ struct PersonDetailView: View {
     }
 
     @EnvironmentObject private var purchaseService: PurchaseService
-
-    private var purchaseService_canUseAI: Bool {
-        purchaseService.isAIUnlocked && GiftAIService.shared.hasAPIKey
-    }
 
     private var GiftHistorySection: some View {
         VStack(alignment: .leading, spacing: 8) {

@@ -58,35 +58,33 @@ Giftly is free with a 5-contact limit. Two separate one-time (non-consumable) pu
 | Age calculator | ❌ | ✅ | ✅ |
 | Data export/import | ❌ | ✅ | ✅ |
 | Dark mode | ✅ | ✅ | ✅ |
-| AI gift suggestions (BYO API Key) | ❌ | ❌ | ✅ |
+| AI gift suggestions (Apple Intelligence on-device) | ❌ | ❌ | ✅ |
 | Gift history tracking | ❌ | ❌ | ✅ |
 | Budget management | ❌ | ❌ | ✅ |
 | Notification quick actions | ✅ | ✅ | ✅ |
 | Restore purchases | ✅ | ✅ | ✅ |
 
-## BYO Key Model: AI Features
+## AI Add-on: How It Works
 
 ### How AI Advanced Works
-- **$5.99 one-time purchase** unlocks the AI features interface (GiftSuggestionView, API key management, budget slider)
-- **User provides their own OpenAI API key** (stored in iOS Keychain) for actual AI calls
-- **AI generation is ALWAYS unlimited** — no counting, no limits, no free tier for AI
-- User pays their own OpenAI API usage costs directly to OpenAI
+- **$5.99 one-time purchase** unlocks unlimited AI gift suggestions
+- **AI suggestions are generated on-device using Apple Intelligence** (FoundationModels framework, iOS 26+)
+- **No account, no setup, and no third-party AI provider are required**
+- **Free tier**: 3 AI suggestions per month for all users
+- **AI Add-on**: Unlimited AI suggestions after one-time purchase
+- All AI processing happens on-device; no network request is made for AI suggestions
 
 ### Why This Model
 1. Zero server cost for developer (no API bills)
 2. Sustainable — no ongoing costs to maintain
-3. Privacy-friendly — requests go directly device → OpenAI
-4. Supports one-time purchase — no recurring API fees to subsidize
-5. User controls which AI model to use
+3. Privacy-friendly — all AI processing stays on the device
+4. Supports one-time purchase — no recurring fees
+5. Compliant with App Store guidelines worldwide, including China
 
-### `canGenerate` Logic
-```
-canGenerate = isAIUnlocked && hasAPIKey
-```
-- NO `freeGenerationsUsed`, `maxFreeGenerations`, `incrementGenerationCount()` — these are dead code in BYO Key model
-- If user has not purchased AI Advanced: AI buttons show paywall (not error)
-- If user purchased AI Advanced but no API key: show "Enter API Key" prompt (not error)
-- If user purchased AI Advanced + has API key: unlimited generation
+### AI Generation Logic
+- If user has not purchased AI Add-on: 3 free suggestions per month; AI buttons show paywall after limit (not error)
+- If user purchased AI Add-on: unlimited on-device suggestions
+- If Apple Intelligence is unavailable (pre-iOS 26 or unsupported device): AI screen shows guidance (not error)
 
 ## Free Trial
 - **Duration**: None (no trial — free tier is permanently usable with 5 contacts)
@@ -94,7 +92,7 @@ canGenerate = isAIUnlocked && hasAPIKey
 
 ## Policy Pages Required
 - Support Page: ✅ (must include restore purchases instructions + IAP info)
-- Privacy Policy: ✅ (must disclose: local data, no cloud, no tracking, BYO API key goes to OpenAI directly)
+- Privacy Policy: ✅ (must disclose: local data, no cloud, no tracking, AI runs on-device via Apple Intelligence)
 - Terms of Use (EULA): ✅ (recommended for IAP apps — covers one-time purchase terms)
 - **Total policy pages**: 3
 
@@ -109,6 +107,6 @@ canGenerate = isAIUnlocked && hasAPIKey
 - [x] All IAP descriptions ≤ 55 characters
 - [x] All IAP display names ≤ 35 characters
 - [x] No subscription — Guideline 3.1.2(c) not applicable
-- [x] BYO API key: no dead code (freeGenerationsUsed, etc.)
-- [x] AI generation unlimited for users with own key
+- [x] AI runs on-device via Apple Intelligence; no external setup or third-party AI provider
+- [x] AI generation unlimited for users who purchased AI Add-on
 - [x] App Review Info: demo instructions for testing IAP

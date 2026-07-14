@@ -8,7 +8,7 @@
 
 - **App Name**: Giftly
 - **Bundle ID**: com.zzoutuo.Giftly
-- **Version**: 1.0 (Build 4)
+- **Version**: 1.0 (Build 5)
 - **Category**: Lifestyle / Productivity
 - **Pricing**: Free with In-App Purchases (one-time, non-consumable — NO subscriptions)
 - **Demo Account**: Not required. Giftly is fully offline and accountless. All features are accessible immediately after download.
@@ -27,9 +27,7 @@ The review team asked two specific questions. Direct answers and technical evide
 - Contacts are read locally on the device using Apple's `CNContactStore` framework (in `Giftly/Services/ContactImportService.swift`).
 - The fetch request only requests these keys: `CNContactGivenNameKey`, `CNContactFamilyNameKey`, `CNContactBirthdayKey`, `CNContactImageDataKey`, `CNContactThumbnailImageDataKey`. It does **not** request phone numbers, email addresses, postal addresses, or any other fields.
 - The imported data (name, birthday, photo) is written into the app's local on-device SwiftData database. No `URLSession`, `URL(string:)`, or any network API is called in `ContactImportService.swift`.
-- A full codebase audit confirms there is no network call anywhere in the app that transmits contact data. The only two network calls in the entire app are:
-  1. Optional AI gift suggestions (sends only the person's name, age, relationship, interests, and budget range — never the full contact record, never the contacts list)
-  2. Optional "Contact Support" form (sends only user-typed subject/message + app version/iOS/device diagnostics — never contact data)
+- A full codebase audit confirms there is no network call anywhere in the app that transmits contact data. AI gift suggestions run entirely on-device via Apple Intelligence — no network call is made for AI suggestions. The only network call in the entire app is the optional "Contact Support" form (sends only user-typed subject/message + app version/iOS/device diagnostics — never contact data).
 - `PrivacyInfo.xcprivacy` declares `NSPrivacyTracking: false` and an empty `NSPrivacyCollectedDataTypes` array.
 
 ### Q2: Do you share the user's contacts to any third-party?
@@ -39,8 +37,7 @@ The review team asked two specific questions. Direct answers and technical evide
 **Technical evidence:**
 - The app contains **zero third-party SDKs** — no analytics, no advertising, no tracking, no crash-reporting SDKs (no Firebase, no Google Analytics, no Mixpanel, no AdMob, no Facebook SDK).
 - There is no data broker, no advertising network, and no third-party API that receives contact information.
-- The AI suggestion feature (when the optional BYO Key path is used) sends only a minimal prompt containing the person's name, age, relationship, interests, and a budget range — directly from the device to the user's own chosen AI provider. The full contact record, the contacts list, and any other person's data are never sent.
-- The default AI provider (iOS 26+) is Apple Intelligence, which runs **on-device** via the FoundationModels framework — no data leaves the device at all.
+- The AI suggestion feature uses Apple Intelligence (iOS 26+), which runs **on-device** via the FoundationModels framework — no data leaves the device at all. No contact record, contacts list, or any person's data is ever sent for AI suggestions.
 - The "Contact Support" form posts only the user-typed message and basic app diagnostics to a Cloudflare Worker endpoint (`feedback-board.iocompile67692.workers.dev`). No contact data is included in that payload.
 - `PrivacyInfo.xcprivacy` declares `NSPrivacyTrackingDomains: []` (empty).
 
@@ -48,7 +45,6 @@ The review team asked two specific questions. Direct answers and technical evide
 - `Giftly/Services/ContactImportService.swift` — local-only contact read
 - `Giftly/Views/ContactSupportView.swift` — support form payload (no contact data)
 - `Giftly/Services/AppleIntelligenceService.swift` — on-device AI (iOS 26+)
-- `Giftly/Services/GiftAIService.swift` — BYO Key AI (minimal prompt only)
 - `Giftly/PrivacyInfo.xcprivacy` — privacy manifest
 - Updated Privacy Policy: https://asunnyboy861.github.io/Giftly/privacy.html (see "Contacts Privacy — Direct Answers" section)
 
@@ -68,7 +64,7 @@ A screen recording has been captured on a physical iPhone running the latest iOS
 8. **Calendar tab** — all birthdays grouped by month
 9. **Settings tab → Upgrade** — Paywall showing both IAP products with prices, Privacy Policy & Terms of Use links
 10. **IAP purchase flow** — tap a purchase button → Apple purchase sheet (Sandbox)
-11. **AI suggestions** (optional) — Settings → enter API key → person detail → AI Ideas → Generate
+11. **AI suggestions** (optional) — person detail → AI Ideas → set budget → Generate Ideas (requires iOS 26+ with Apple Intelligence)
 
 **Permission prompts shown in recording**: Notifications, Contacts. No App Tracking Transparency prompt (app does not track). No camera/photo-library prompts (uses PhotosPicker, which requires no permission).
 
@@ -86,7 +82,7 @@ The app was tested on the following devices/simulators before submission:
 | iPhone Xs Max | Simulator | iOS 18.4 | Build, launch, full feature flow |
 | iPad Pro 13-inch (M5) | Simulator | iOS 26.4 | Build, launch, layout |
 
-Testing covered: app launch, onboarding, manual person entry, contact import, birthday notifications scheduling, gift idea CRUD + status transitions, gift history, calendar view, search, favorites, data export/import, both IAP products (StoreKit Configuration file), restore purchases, AI flow with API key, and dark mode.
+Testing covered: app launch, onboarding, manual person entry, contact import, birthday notifications scheduling, gift idea CRUD + status transitions, gift history, calendar view, search, favorites, data export/import, both IAP products (StoreKit Configuration file), restore purchases, AI suggestions via Apple Intelligence (iOS 26+), and dark mode.
 
 A physical-device screen recording (item 1) and physical-device testing were also performed.
 
@@ -127,21 +123,15 @@ A physical-device screen recording (item 1) and physical-device testing were als
 
 **Sample files**: None required. Users add their own birthdays manually or import from Contacts.
 
-**AI feature testing** (two paths):
+**AI feature testing**:
 
-*Path A — Apple Intelligence (default, on-device, iOS 26+)*
+*Apple Intelligence (default, on-device, iOS 26+)*
 1. On an iOS 26+ device with Apple Intelligence enabled, open any person → "AI Ideas"
-2. The default provider is Apple Intelligence — 3 free suggestions per month, no API key needed
-3. Set a budget range → "Generate Ideas" — suggestions appear on-device, no data leaves the device
-4. After 3 free uses, the button shows the Paywall (not an error)
+2. The provider is Apple Intelligence — 3 free suggestions per month
+3. Set a budget range → "Generate Ideas" — suggestions are generated on-device; no data leaves the device
+4. After 3 free uses, the "Generate Ideas" button shows the Paywall (not an error)
 5. Purchase "AI Add-on" ($5.99) for unlimited on-device suggestions
-
-*Path B — Bring Your Own Key (optional, advanced)*
-1. Settings → Purchases → "Upgrade to Giftly Pro" or purchase "AI Add-on" ($5.99)
-2. Settings → Advanced — BYO Key → enter any ChatCompletions-compatible API key → Save (stored in Keychain)
-3. Open any person → "AI Ideas" → set budget → "Generate Ideas"
-4. If no API key is set and Apple Intelligence is unavailable, the AI screen shows guidance (NOT an error)
-5. If AI Add-on is not purchased and the free tier is exhausted, the "AI Ideas" button shows the Paywall (NOT an error)
+6. If Apple Intelligence is unavailable (pre-iOS 26 or unsupported device), the AI screen shows an "Apple Intelligence Required" guidance state (NOT an error)
 
 ---
 
@@ -150,8 +140,7 @@ A physical-device screen recording (item 1) and physical-device testing were als
 | Service | Purpose | User-Facing? | Data Sent |
 |---|---|---|---|
 | **Apple StoreKit 2** | In-App Purchases (Pro Unlock $4.99, AI Add-on $5.99) | Yes (purchase flow) | Purchase transactions handled by Apple |
-| **Apple Intelligence** (FoundationModels framework, iOS 26+) | Default AI gift suggestions (on-device) | Yes (3 free/month, unlimited with AI Add-on) | **None** — runs entirely on-device. No data leaves the device. |
-| **OpenAI-compatible ChatCompletions API** (user-configured, optional advanced) | AI gift suggestions via BYO key | Yes (optional) | Minimal prompt only (person's name, age, relationship, interests, budget range) sent directly from device to user's chosen API endpoint. Never the full contact record or contacts list. API key stored in iOS Keychain, never transmitted to Giftly's servers. |
+| **Apple Intelligence** (FoundationModels framework, iOS 26+) | AI gift suggestions (on-device) | Yes (3 free/month, unlimited with AI Add-on) | **None** — runs entirely on-device. No data leaves the device. |
 | **Cloudflare Workers** (feedback-board.iocompile67692.workers.dev) | In-app "Contact Support" feedback form | Yes (optional) | User-submitted subject, message, and basic app diagnostics (version, iOS, device model) — only when user actively submits. **No contact data.** |
 | **SwiftData** (Apple framework) | Local on-device data storage | No (local) | All user data stays on device |
 | **Apple UserNotifications** | Local birthday reminders | No (system) | Notification scheduling (local, no server) |
@@ -159,7 +148,7 @@ A physical-device screen recording (item 1) and physical-device testing were als
 
 **Third-party SDKs**: NONE. The app contains no analytics SDKs, no advertising SDKs, no tracking SDKs, and no crash-reporting SDKs. All frameworks used are Apple-native (SwiftUI, SwiftData, StoreKit, UserNotifications, Contacts, FoundationModels, WidgetKit-ready).
 
-**No intermediary server for AI**: AI requests go directly from the user's device to their chosen API provider (BYO Key path), or run entirely on-device (Apple Intelligence path). Giftly does not operate a proxy or backend for AI calls.
+**No intermediary server for AI**: AI suggestions run entirely on-device via Apple Intelligence. Giftly does not operate a proxy or backend for AI calls.
 
 **Contacts are never uploaded or shared**: Contact data is read locally via `CNContactStore`, stored in the on-device SwiftData database, and never transmitted over any network call.
 
@@ -172,9 +161,9 @@ A physical-device screen recording (item 1) and physical-device testing were als
 Specifically:
 - All app content (UI text, descriptions) is in English and identical worldwide
 - Both In-App Purchases are available in all App Store regions (prices adjust to local currency via Apple's price tiers)
-- The AI feature uses a "Bring Your Own Key" model — users in any region can configure their own API provider and endpoint, so no region is blocked or favored
+- The AI feature uses Apple Intelligence on-device; no third-party AI provider is referenced or required
 - No content is geo-restricted
-- The app does not reference, promote, or bundle any specific AI provider (e.g., ChatGPT/OpenAI) or any specific retailer (e.g., Amazon) in the user-facing UI or metadata, making it safe for distribution in all regions including China
+- The app does not reference, promote, or bundle any specific AI provider, brand, or retailer in the user-facing UI or metadata
 - Privacy Policy, Terms of Use, and Support Page are accessible globally via GitHub Pages
 
 ---
@@ -186,7 +175,7 @@ Specifically:
 - The app is a personal productivity/lifestyle tool (birthday reminders and gift planning)
 - No medical, financial, legal, or gambling functionality
 - No third-party copyrighted content (all UI, icons, and text are original or Apple system-provided)
-- AI gift suggestions are generated by the user's own API key and are the user's own output — Giftly does not provide or curate AI content
+- AI gift suggestions are generated on-device by Apple Intelligence — Giftly does not provide, curate, or transmit AI content
 - No licenses or credentials are required to operate this app
 
 ---
@@ -225,8 +214,7 @@ Each permission request includes a clear, specific purpose string:
 
 - **All user data is stored locally on-device** using SwiftData (no cloud, no server, no account)
 - **No analytics, no advertising, no tracking** — zero third-party data-collecting SDKs
-- **API key** stored in iOS Keychain (`kSecAttrAccessibleWhenUnlocked`), never leaves the device
-- **AI requests** go directly from device to user's chosen API provider (no intermediary server)
+- **AI suggestions** run on-device via Apple Intelligence — no network call is made and no data leaves the device
 - **Contacts import** reads only name, birthday, photo (privacy-minimized — no phone/email/address)
 - **PrivacyInfo.xcprivacy** included in the app bundle declaring UserDefaults and FileTimestamp API usage
 - Policy pages: Privacy Policy, Terms of Use, Support Page — all deployed and accessible in-app
@@ -243,4 +231,4 @@ Each permission request includes a clear, specific purpose string:
 
 If you have any questions during review, please contact: **iocompile67692@gmail.com**
 
-We are happy to provide a demo API key for AI feature testing upon request. Without an API key, the AI screen shows a clear guidance prompt (not an error) and all other features are fully functional.
+AI feature testing requires an iOS 26+ device or simulator with Apple Intelligence enabled. If Apple Intelligence is unavailable, the AI screen shows a clear guidance state (not an error) and all other features are fully functional.

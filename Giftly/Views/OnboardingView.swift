@@ -24,7 +24,7 @@ struct OnboardingView: View {
         OnboardingPage(
             icon: "wand.and.stars",
             title: "Plan Gifts with AI",
-            subtitle: "Get smart gift suggestions based on interests, age, and budget. Track ideas from spark to giving.",
+            subtitle: "Get 3 free AI gift suggestions every month. Track ideas from spark to giving.",
             accentColor: "GiftlyCoral"
         ),
         OnboardingPage(

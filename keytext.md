@@ -21,7 +21,7 @@ PLAN GIFTS LIKE A PRO
 
 AI GIFT SUGGESTIONS - FREE TO START
 - Stuck on what to buy? Let AI suggest thoughtful gifts
-- 3 free suggestions every month - no API key needed
+- 3 free suggestions every month
 - Powered by Apple Intelligence on-device for maximum privacy
 - Set your budget and get 5 personalized suggestions instantly
 - Upgrade to unlimited AI suggestions with a one-time purchase
@@ -43,7 +43,7 @@ BEAUTIFUL AND PRIVATE
 ONE-TIME PRICING. NO SUBSCRIPTIONS. EVER.
 - Free: Up to 5 birthdays, day-of reminders, 3 AI suggestions per month, basic features
 - Giftly Pro ($4.99 one-time): Unlimited birthdays, contact import, all reminder tiers, gift idea tracking, gift history, data export
-- Giftly AI ($5.99 one-time): Unlimited AI gift suggestions - no API key needed
+- Giftly AI ($5.99 one-time): Unlimited AI gift suggestions - powered by Apple Intelligence
 
 Restore purchases anytime at no extra cost. Pay once, use forever.
 
@@ -51,7 +51,6 @@ PRIVACY FIRST
 - All data stays on your device
 - No analytics, no advertising, no tracking
 - AI runs on-device via Apple Intelligence - your data never leaves your phone
-- Optional: bring your own API key for premium models (stored in iOS Keychain)
 - Privacy Policy: https://asunnyboy861.github.io/Giftly/privacy.html
 - Terms of Use: https://asunnyboy861.github.io/Giftly/terms.html
 
@@ -68,7 +67,7 @@ FEATURES
 - Gift idea tracking with status: Idea, Planned, Purchased, Given
 - Gift history to prevent duplicate gifting
 - AI gift suggestions - 3 free per month, unlimited with one-time purchase
-- Powered by Apple Intelligence on-device - no API key needed
+- Powered by Apple Intelligence on-device
 - One-tap contact import (privacy-minimized - name, birthday, photo only)
 - Calendar view of all birthdays grouped by month
 - Actionable notifications with Call, Message, and Gift Ideas buttons
@@ -82,7 +81,7 @@ FEATURES
 PRICING
 - Free: Up to 5 birthdays, day-of reminders, 3 AI suggestions per month
 - Giftly Pro ($4.99 one-time): Unlimited birthdays, contact import, gift tracking, data export
-- Giftly AI ($5.99 one-time): Unlimited AI gift suggestions - no API key needed
+- Giftly AI ($5.99 one-time): Unlimited AI gift suggestions - powered by Apple Intelligence
 
 We built Giftly because we were tired of subscription-only birthday apps. Pay once, use forever.
 
@@ -90,8 +89,8 @@ We built Giftly because we were tired of subscription-only birthday apps. Pay on
 Thank you for reviewing Giftly!
 
 CONTACTS PRIVACY (in response to Guideline 2.1 inquiry):
-- Do you upload the user's contacts to the server? NO. Contacts are read locally via Apple's CNContactStore and stored in the on-device SwiftData database. No network call transmits contact data. The only network calls in the app are optional AI suggestions (which send only the person's name, age, relationship, interests, budget - never the contact record or contacts list) and an optional support form (which sends only user-typed message + app diagnostics - never contact data).
-- Do you share the user's contacts to any third-party? NO. The app contains zero third-party SDKs (no analytics, no advertising, no tracking). No data broker, advertising network, or third-party API receives contact information. The default AI provider is Apple Intelligence (on-device, iOS 26+) - no data leaves the device. The optional BYO Key AI path sends only a minimal prompt (name, age, relationship, interests, budget) to the user's own chosen provider, never the full contact record.
+- Do you upload the user's contacts to the server? NO. Contacts are read locally via Apple's CNContactStore and stored in the on-device SwiftData database. No network call transmits contact data. AI gift suggestions run entirely on-device via Apple Intelligence - no network call is made for AI suggestions. The only network call in the app is the optional support form (which sends only user-typed message + app diagnostics - never contact data).
+- Do you share the user's contacts to any third-party? NO. The app contains zero third-party SDKs (no analytics, no advertising, no tracking). No data broker, advertising network, or third-party API receives contact information. AI gift suggestions use Apple Intelligence (on-device, iOS 26+) - no data leaves the device.
 - Privacy manifest (PrivacyInfo.xcprivacy) declares NSPrivacyTracking: false and an empty NSPrivacyCollectedDataTypes array.
 - Updated Privacy Policy with a dedicated "Contacts Privacy - Direct Answers" section: https://asunnyboy861.github.io/Giftly/privacy.html
 
@@ -106,7 +105,7 @@ TESTING THE APP (Free Tier):
 IAP TESTING:
 - Two non-consumable products:
   - com.zzoutuo.Giftly.prounlock ($4.99) - Removes 5-contact limit, enables contact import, gift tracking, gift history, data export
-  - com.zzoutuo.Giftly.aiunlock ($5.99) - Unlimited AI gift suggestions (no API key needed - uses Apple Intelligence)
+  - com.zzoutuo.Giftly.aiunlock ($5.99) - Unlimited AI gift suggestions - powered by Apple Intelligence
 - A StoreKit Configuration file (Giftly.storekit) is included in the project for local testing
 - To enable StoreKit testing: Edit Scheme -> Run -> Options -> StoreKit Configuration -> select Giftly.storekit
 - Purchase Pro Unlock from Settings tab -> "Upgrade to Giftly Pro" button
@@ -114,7 +113,7 @@ IAP TESTING:
 - "Restore Purchases" button is available in Settings -> Purchases section
 
 AI FEATURE TESTING - IMPORTANT:
-- The app uses Apple Intelligence (on-device) as the default AI provider - NO API KEY REQUIRED
+- The app uses Apple Intelligence (on-device) as the ONLY AI provider
 - Free tier: 3 AI suggestions per month (auto-resets monthly)
 - AI Add-on ($5.99): Unlimited AI suggestions
 - To test AI (on iOS 26+ with Apple Intelligence enabled):
@@ -124,12 +123,10 @@ AI FEATURE TESTING - IMPORTANT:
   4. Tap "Add as Idea" on any suggestion to save it to gift ideas
   5. The usage banner shows remaining free suggestions (e.g., "3 of 3 free suggestions remaining this month")
 - If Apple Intelligence is not available (pre-iOS 26 or unsupported device):
-  - The AI screen shows "API Key Required" with a link to Settings
-  - User can add their own API key in Settings -> Advanced -> BYO Key
-  - Any ChatCompletions-compatible provider works (OpenAI, Gemini, DeepSeek, etc.)
+  - The AI screen shows "Apple Intelligence Required" explaining the feature is unavailable
+  - No external AI provider or outside mechanism is used
 - If free tier is exhausted: AI buttons show the paywall (NOT an error)
-- API key (optional) is stored in iOS Keychain and never leaves the device
-- AI requests go directly from the device to the provider (no intermediary server)
+- AI runs entirely on-device via Apple Intelligence - no network call is made for AI suggestions
 
 CONTACT IMPORT TESTING:
 - Requires Contacts access permission
@@ -150,7 +147,6 @@ PRIVACY:
 - App does NOT use App Tracking Transparency (no tracking performed)
 - Contact import reads only name, birthday, and photo
 - AI runs on-device via Apple Intelligence (no data leaves the device)
-- Optional API key stored in iOS Keychain
 - Privacy Policy: https://asunnyboy861.github.io/Giftly/privacy.html
 - Terms of Use: https://asunnyboy861.github.io/Giftly/terms.html
 - Support Page: https://asunnyboy861.github.io/Giftly/support.html

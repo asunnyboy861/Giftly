@@ -141,10 +141,22 @@ final class GiftViewModel {
         for person: Person,
         budgetMin: Double,
         budgetMax: Double,
-        canGenerate: Bool
+        isAIUnlocked: Bool
     ) async {
-        guard canGenerate else {
-            errorMessage = "Unlock AI or add your API key in Settings."
+        let appleAIAvailable: Bool
+        if #available(iOS 26, *) {
+            appleAIAvailable = AppleIntelligenceService.shared.isAvailable
+        } else {
+            appleAIAvailable = false
+        }
+
+        guard #available(iOS 26, *), appleAIAvailable else {
+            errorMessage = "Apple Intelligence is not available on this device. AI gift suggestions require iOS 26 or later with Apple Intelligence enabled."
+            return
+        }
+
+        guard AIUsageTracker.shared.canUseFreeTier(isAIUnlocked: isAIUnlocked) else {
+            errorMessage = "You've used all 3 free suggestions this month. Upgrade to AI Add-on for unlimited suggestions."
             return
         }
 
@@ -153,11 +165,14 @@ final class GiftViewModel {
         aiSuggestions = []
 
         do {
-            aiSuggestions = try await GiftAIService.shared.generateGiftSuggestions(
+            aiSuggestions = try await AppleIntelligenceService.shared.generateGiftSuggestions(
                 person: person,
                 budgetMin: budgetMin,
                 budgetMax: budgetMax
             )
+            if !isAIUnlocked {
+                AIUsageTracker.shared.incrementUsage()
+            }
         } catch {
             errorMessage = error.localizedDescription
         }

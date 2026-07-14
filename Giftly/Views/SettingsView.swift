@@ -10,10 +10,6 @@ struct SettingsView: View {
 
     @Query private var people: [Person]
 
-    @State private var apiKey: String = ""
-    @State private var showingAPIKey: Bool = false
-    @State private var customModel: String = ""
-    @State private var customBaseURL: String = ""
     @State private var showingExportSheet = false
     @State private var exportFileURL: URL?
     @State private var showingImportPicker = false
@@ -30,7 +26,7 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 PurchaseSection
-                APIKeySection
+                AIProviderSection
                 NotificationsSection
                 SupportSection
                 LegalSection
@@ -47,11 +43,6 @@ struct SettingsView: View {
                 if let url = exportFileURL {
                     ActivityShareView(items: [url])
                 }
-            }
-            .onAppear {
-                apiKey = GiftAIService.shared.getAPIKey() ?? ""
-                customModel = GiftAIService.shared.getModel()
-                customBaseURL = GiftAIService.shared.getBaseURL()
             }
         }
     }
@@ -86,57 +77,53 @@ struct SettingsView: View {
         }
     }
 
-    private var APIKeySection: some View {
+    private var AIProviderSection: some View {
         Section {
             HStack {
-                if showingAPIKey {
-                    TextField("API Key", text: $apiKey)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                let aiAvailable: Bool = {
+                    if #available(iOS 26, *) {
+                        return AppleIntelligenceService.shared.isAvailable
+                    } else {
+                        return false
+                    }
+                }()
+                if aiAvailable {
+                    Image(systemName: "apple.logo")
+                        .foregroundStyle(Color("GiftlyMint"))
+                    Text("Apple Intelligence")
+                        .font(.subheadline)
+                    Spacer()
+                    Text("Active")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(Color("GiftlyMint"))
                 } else {
-                    SecureField("API Key", text: $apiKey)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                }
-                Button {
-                    showingAPIKey.toggle()
-                } label: {
-                    Image(systemName: showingAPIKey ? "eye.slash" : "eye")
+                    Image(systemName: "apple.logo")
+                        .foregroundStyle(.secondary)
+                    Text("Apple Intelligence")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text("Unavailable")
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
-            TextField("Model name", text: $customModel)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-            TextField("Base URL (ChatCompletions-compatible)", text: $customBaseURL)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-            Button("Save API Settings") {
-                GiftAIService.shared.saveAPIKey(apiKey)
-                GiftAIService.shared.saveModel(customModel)
-                GiftAIService.shared.saveBaseURL(customBaseURL)
-            }
-            .disabled(apiKey.trimmingCharacters(in: .whitespaces).isEmpty && customModel.trimmingCharacters(in: .whitespaces).isEmpty && customBaseURL.trimmingCharacters(in: .whitespaces).isEmpty)
-            if apiKey.isEmpty {
-                Text("Bring your own API key. Stored securely in Keychain. We never see or store your key.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
-                Button(role: .destructive) {
-                    GiftAIService.shared.deleteAPIKey()
-                    apiKey = ""
-                } label: {
-                    Label("Remove API Key", systemImage: "trash")
+            if !purchaseService.isAIUnlocked {
+                HStack {
+                    Image(systemName: "sparkles")
+                        .foregroundStyle(Color("GiftlyCoral"))
+                    Text("Free Tier")
+                        .font(.subheadline)
+                    Spacer()
+                    Text("\(AIUsageTracker.shared.remainingFreeUses)/\(AIUsageTracker.shared.freeTierLimitValue) this month")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
         } header: {
-            Text("AI Configuration")
+            Text("AI Provider")
         } footer: {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Bring Your Own Key (BYO Key) model: your AI calls go directly to your provider. Giftly never sees or stores your key.")
-                Text("Get an API key from your preferred AI provider (any ChatCompletions-compatible service works).")
-                    .font(.caption)
-            }
+            Text("Giftly uses Apple Intelligence on-device. No setup needed. Your data never leaves your device.")
         }
     }
 
