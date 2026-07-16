@@ -67,7 +67,7 @@ struct OnboardingView: View {
                                 ProgressView()
                                     .tint(.white)
                             }
-                            Text(isImporting ? "Importing..." : "Import from Contacts")
+                            Text(isImporting ? "Importing..." : "Continue")
                                 .font(.headline)
                         }
                         .frame(maxWidth: .infinity)
@@ -77,14 +77,6 @@ struct OnboardingView: View {
                     .tint(Color("GiftlyPurple"))
                     .disabled(isImporting)
                     .padding(.horizontal)
-
-                    Button {
-                        finishOnboarding()
-                    } label: {
-                        Text(people.isEmpty ? "Skip for now" : "Done")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
                 } else if currentPage == pages.count - 1 {
                     Button {
                         withAnimation {

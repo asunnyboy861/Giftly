@@ -1,6 +1,6 @@
 # Giftly — App Review Information (Reply to Review Team)
 
-> Paste the content of the "Review Notes (Reply)" section below into the App Review Information → Notes field in App Store Connect. This document directly answers the 7 items requested in the review feedback, plus the two contacts-privacy questions raised in the July 13, 2026 review (Guideline 2.1).
+> Paste the content of the "Review Notes (Reply)" section below into the App Review Information → Notes field in App Store Connect. This document directly answers the 3 issues raised in the July 16, 2026 review (Guidelines 5.1.1(iv), 2.3, and 2.1), plus the 7 items from the original review template.
 
 ---
 
@@ -8,18 +8,86 @@
 
 - **App Name**: Giftly
 - **Bundle ID**: com.zzoutuo.Giftly
-- **Version**: 1.0 (Build 5)
+- **Version**: 1.0 (Build 7)
 - **Category**: Lifestyle / Productivity
 - **Pricing**: Free with In-App Purchases (one-time, non-consumable — NO subscriptions)
 - **Demo Account**: Not required. Giftly is fully offline and accountless. All features are accessible immediately after download.
 
 ---
 
-## Response to Guideline 2.1 (July 13, 2026) — Contacts Privacy Questions
+## Response to Guideline 5.1.1(iv) (July 16, 2026) — Permission Request UI
 
-The review team asked two specific questions. Direct answers and technical evidence follow.
+The review team identified two issues with the pre-permission message before the Contacts permission request. Both have been fixed in Build 7.
 
-### Q1: Do you upload the user's contacts to the server?
+### Issue 1: Button text "Import from Contacts" → renamed to "Continue"
+
+**Fixed.** The button on the onboarding import page (the custom message before the permission request) now says **"Continue"** instead of "Import from Contacts". Tapping "Continue" proceeds directly to the system Contacts permission dialog.
+
+**File**: `Giftly/Views/OnboardingView.swift` — the button label on the final onboarding page (ImportPage) was changed from `"Import from Contacts"` to `"Continue"`.
+
+### Issue 2: "Skip for now" button removed
+
+**Fixed.** The "Skip for now" button that allowed users to close the pre-permission message and delay the permission request has been **completely removed**. Users now always proceed to the system Contacts permission request after the pre-permission message.
+
+**File**: `Giftly/Views/OnboardingView.swift` — the secondary button (`Text(people.isEmpty ? "Skip for now" : "Done")`) was removed from the `currentPage == pages.count` branch.
+
+### How the fixed flow works
+
+1. User swipes through 3 onboarding pages (welcome → AI → reminders)
+2. On the final "Import in One Tap" page, a single **"Continue"** button is shown
+3. Tapping "Continue" triggers `CNContactStore.requestAccess(for: .contacts)` — the system permission dialog appears
+4. User grants or denies in the **system** dialog (this is where the user has control)
+5. If granted: contacts with birthdays are imported; a success alert appears; user taps "Let's Go!" to finish onboarding
+6. If denied: a post-permission alert offers "Open Settings" (to grant later) or "Cancel" (to continue without contacts). This alert appears AFTER the system permission dialog, which is compliant.
+
+**Note**: The pre-permission message only explains WHY contacts are needed ("Giftly reads ONLY names, birthdays, and photos from your contacts. No phone numbers, emails, or addresses.") and does not block or delay the permission request.
+
+---
+
+## Response to Guideline 2.3 (July 16, 2026) — AI Configuration Metadata
+
+The review team was unable to locate "AI configuration" described in the metadata. The AI feature IS fully implemented in the app. Below is exactly where to find it.
+
+### Where AI features are located
+
+AI gift suggestions are **not** a separate settings/configuration screen. They are accessed **per-person** from the Person Detail View:
+
+1. **Add a person**: Tap the **"+"** button (top-right) on the Home tab → enter name + birthday → Save
+2. **Open Person Detail**: Tap the person's birthday card on the Home tab
+3. **Tap "AI Ideas"**: In the "Gift Ideas" section of Person Detail, tap the **"AI Ideas"** button (wand.and.stars icon, coral tint)
+4. **AI Suggestions screen opens**: Shows budget sliders, a "Generate Ideas" button, and a usage banner ("3 of 3 free suggestions remaining this month")
+
+**File references**:
+- `Giftly/Views/PersonDetailView.swift` — the "AI Ideas" button is in `GiftIdeasSection` (around line 231)
+- `Giftly/Views/GiftSuggestionView.swift` — the AI suggestions screen with budget sliders and generation
+- `Giftly/Services/AppleIntelligenceService.swift` — the on-device AI service (FoundationModels framework, iOS 26+)
+
+### Settings → AI Provider section
+
+The Settings tab has an **"AI Provider"** section that shows the **status** of Apple Intelligence:
+- If Apple Intelligence is available (iOS 26+ on supported device with AI enabled): shows "Apple Intelligence — Active"
+- If unavailable: shows "Apple Intelligence — Unavailable"
+- The section footer now includes navigation guidance: *"To use AI suggestions: open any person's detail and tap 'AI Ideas'. Giftly uses Apple Intelligence on-device — no setup needed. Your data never leaves your device. AI requires iOS 26+ with Apple Intelligence enabled."*
+
+**File**: `Giftly/Views/SettingsView.swift` — `AIProviderSection` (around line 80)
+
+### Why AI may appear unavailable on the review device
+
+The review was conducted on **iPad Air 11-inch (M3)**. Apple Intelligence requires:
+- iOS 26 or later
+- Apple Intelligence enabled in iOS Settings → Apple Intelligence & Siri
+
+If Apple Intelligence is not enabled (or the review environment is a simulator where Apple Intelligence is not available), the AI Suggestions screen shows an **"Apple Intelligence Required"** guidance state with instructions to enable it in Settings. **This is the feature working as designed** — it is not a missing feature or an error. The app does not use any external AI provider or API key; Apple Intelligence is the only AI provider.
+
+### Metadata accuracy
+
+The app description and What's New mention "AI Gift Suggestions" and "Powered by Apple Intelligence on-device". These are accurate — the feature is implemented and accessible as described above. There is no reference to "AI configuration" as a separate screen in the metadata; the term "AI configuration" in the review feedback likely refers to the AI feature in general, which is located in Person Detail → "AI Ideas".
+
+---
+
+## Response to Guideline 2.1 (July 16, 2026) — Contacts Upload Question
+
+### Q: Do you upload the user's contacts to the server?
 
 **No.** Giftly does **NOT** upload user contacts to any server.
 
@@ -30,21 +98,10 @@ The review team asked two specific questions. Direct answers and technical evide
 - A full codebase audit confirms there is no network call anywhere in the app that transmits contact data. AI gift suggestions run entirely on-device via Apple Intelligence — no network call is made for AI suggestions. The only network call in the entire app is the optional "Contact Support" form (sends only user-typed subject/message + app version/iOS/device diagnostics — never contact data).
 - `PrivacyInfo.xcprivacy` declares `NSPrivacyTracking: false` and an empty `NSPrivacyCollectedDataTypes` array.
 
-### Q2: Do you share the user's contacts to any third-party?
-
-**No.** Giftly does **NOT** share user contacts with any third-party.
-
-**Technical evidence:**
-- The app contains **zero third-party SDKs** — no analytics, no advertising, no tracking, no crash-reporting SDKs (no Firebase, no Google Analytics, no Mixpanel, no AdMob, no Facebook SDK).
-- There is no data broker, no advertising network, and no third-party API that receives contact information.
-- The AI suggestion feature uses Apple Intelligence (iOS 26+), which runs **on-device** via the FoundationModels framework — no data leaves the device at all. No contact record, contacts list, or any person's data is ever sent for AI suggestions.
-- The "Contact Support" form posts only the user-typed message and basic app diagnostics to a Cloudflare Worker endpoint (`feedback-board.iocompile67692.workers.dev`). No contact data is included in that payload.
-- `PrivacyInfo.xcprivacy` declares `NSPrivacyTrackingDomains: []` (empty).
-
 **Files referenced for verification:**
-- `Giftly/Services/ContactImportService.swift` — local-only contact read
+- `Giftly/Services/ContactImportService.swift` — local-only contact read (no network calls)
 - `Giftly/Views/ContactSupportView.swift` — support form payload (no contact data)
-- `Giftly/Services/AppleIntelligenceService.swift` — on-device AI (iOS 26+)
+- `Giftly/Services/AppleIntelligenceService.swift` — on-device AI (iOS 26+, no network)
 - `Giftly/PrivacyInfo.xcprivacy` — privacy manifest
 - Updated Privacy Policy: https://asunnyboy861.github.io/Giftly/privacy.html (see "Contacts Privacy — Direct Answers" section)
 
@@ -55,16 +112,16 @@ The review team asked two specific questions. Direct answers and technical evide
 A screen recording has been captured on a physical iPhone running the latest iOS and is attached to this submission. The recording demonstrates the full typical user flow:
 
 1. **Launch** the app from the Home screen (cold start)
-2. **Onboarding** — 3-page welcome → notification permission prompt (tap Allow)
+2. **Onboarding** — 3-page welcome → final "Import in One Tap" page → tap "Continue" → Contacts permission prompt (tap Allow) → birthdays imported
 3. **Add a birthday manually** — tap "+" → fill name, birthday, photo, relationship → Save (confetti animation)
-4. **Contact import** — tap the contacts icon → Contacts permission prompt (tap Allow) → birthdays imported
-5. **Birthday cards** — today's birthday (pink border) + upcoming birthdays with countdown
-6. **Person detail** — tap a card → age, zodiac, gift ideas, gift history
+4. **Birthday cards** — today's birthday (pink border) + upcoming birthdays with countdown
+5. **Person detail** — tap a card → age, zodiac, gift ideas, gift history
+6. **AI Ideas** — in Person Detail, tap "AI Ideas" → set budget → Generate Ideas (requires iOS 26+ with Apple Intelligence)
 7. **Gift idea tracking** — add a gift idea → advance status Idea → Planned → Purchased → Given
 8. **Calendar tab** — all birthdays grouped by month
-9. **Settings tab → Upgrade** — Paywall showing both IAP products with prices, Privacy Policy & Terms of Use links
-10. **IAP purchase flow** — tap a purchase button → Apple purchase sheet (Sandbox)
-11. **AI suggestions** (optional) — person detail → AI Ideas → set budget → Generate Ideas (requires iOS 26+ with Apple Intelligence)
+9. **Settings tab → AI Provider** — shows Apple Intelligence status; footer explains how to access AI Ideas
+10. **Settings tab → Upgrade** — Paywall showing both IAP products with prices, Privacy Policy & Terms of Use links
+11. **IAP purchase flow** — tap a purchase button → Apple purchase sheet (Sandbox)
 
 **Permission prompts shown in recording**: Notifications, Contacts. No App Tracking Transparency prompt (app does not track). No camera/photo-library prompts (uses PhotosPicker, which requires no permission).
 
@@ -111,13 +168,14 @@ A physical-device screen recording (item 1) and physical-device testing were als
 **No setup required.** Giftly is accountless and works immediately after download.
 
 **To test the app:**
-1. Launch Giftly — onboarding appears on first launch (3 welcome pages + notification permission request)
-2. Tap **"+"** (top-right) to add a person manually: enter name, birthday, optional photo/relationship/interests/notes → Save
-3. Tap the **contacts icon** (top-left) to import birthdays from Contacts (permission required — app reads ONLY name, birthday, photo; never phone/email/address)
+1. Launch Giftly — onboarding appears on first launch (3 welcome pages → final "Import in One Tap" page with a "Continue" button → Contacts permission prompt)
+2. Tap **"+"** (top-right) on the Home tab to add a person manually: enter name, birthday, optional photo/relationship/interests/notes → Save
+3. Tap the **contacts icon** (top-left) on the Home tab to import birthdays from Contacts (permission required — app reads ONLY name, birthday, photo; never phone/email/address)
 4. Tap any birthday card to open **Person Detail** — see age, zodiac, gift ideas, gift history
-5. Tap **"View List"** on a person to add gift ideas and advance their status (Idea → Planned → Purchased → Given)
-6. Switch to the **Calendar** tab to see all birthdays by month
-7. Switch to the **Settings** tab to configure AI, export/import data, view legal pages, or upgrade
+5. In Person Detail, tap **"AI Ideas"** (in the Gift Ideas section) to open the AI Suggestions screen
+6. Tap **"View List"** on a person to add gift ideas and advance their status (Idea → Planned → Purchased → Given)
+7. Switch to the **Calendar** tab to see all birthdays by month
+8. Switch to the **Settings** tab → **AI Provider** section shows Apple Intelligence status; export/import data; view legal pages; or upgrade
 
 **Login credentials**: None required (no account system).
 
@@ -126,12 +184,12 @@ A physical-device screen recording (item 1) and physical-device testing were als
 **AI feature testing**:
 
 *Apple Intelligence (default, on-device, iOS 26+)*
-1. On an iOS 26+ device with Apple Intelligence enabled, open any person → "AI Ideas"
+1. On an iOS 26+ device with Apple Intelligence enabled, open any person → tap "AI Ideas" in the Gift Ideas section
 2. The provider is Apple Intelligence — 3 free suggestions per month
 3. Set a budget range → "Generate Ideas" — suggestions are generated on-device; no data leaves the device
 4. After 3 free uses, the "Generate Ideas" button shows the Paywall (not an error)
 5. Purchase "AI Add-on" ($5.99) for unlimited on-device suggestions
-6. If Apple Intelligence is unavailable (pre-iOS 26 or unsupported device), the AI screen shows an "Apple Intelligence Required" guidance state (NOT an error)
+6. If Apple Intelligence is unavailable (pre-iOS 26, unsupported device, or not enabled in iOS Settings > Apple Intelligence & Siri), the AI screen shows an "Apple Intelligence Required" guidance state (NOT an error — this is the feature working as designed)
 
 ---
 

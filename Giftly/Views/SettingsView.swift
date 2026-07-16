@@ -123,7 +123,7 @@ struct SettingsView: View {
         } header: {
             Text("AI Provider")
         } footer: {
-            Text("Giftly uses Apple Intelligence on-device. No setup needed. Your data never leaves your device.")
+            Text("To use AI suggestions: open any person's detail and tap \"AI Ideas\". Giftly uses Apple Intelligence on-device — no setup needed. Your data never leaves your device. AI requires iOS 26+ with Apple Intelligence enabled.")
         }
     }
 

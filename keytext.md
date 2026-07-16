@@ -88,7 +88,19 @@ We built Giftly because we were tired of subscription-only birthday apps. Pay on
 ## Review Notes
 Thank you for reviewing Giftly!
 
-CONTACTS PRIVACY (in response to Guideline 2.1 inquiry):
+PERMISSION REQUEST UI (Guideline 5.1.1(iv) - July 16, 2026):
+- The pre-permission message on the onboarding import page now uses a "Continue" button (previously "Import from Contacts") to proceed to the system Contacts permission prompt.
+- The "Skip for now" button has been REMOVED from the pre-permission message. Users always proceed to the system permission request after the message.
+- After the system permission dialog, if the user denies access, an alert offers "Open Settings" (to grant later) or "Cancel" (to continue without contacts). This is a post-permission alert, which is compliant.
+- The pre-permission message only explains WHY contacts are needed (reads only name, birthday, photo) and does not block or delay the permission request.
+
+AI FEATURE LOCATION (Guideline 2.3 - July 16, 2026):
+- AI gift suggestions are implemented and accessible at: Person Detail View -> "AI Ideas" button (in the Gift Ideas section).
+- Settings -> "AI Provider" section shows Apple Intelligence status (Active/Unavailable) with a footer explaining how to access AI Ideas.
+- AI requires iOS 26+ with Apple Intelligence enabled. If unavailable, the AI screen shows "Apple Intelligence Required" guidance (this is the feature working as designed, not a missing feature).
+- There is NO separate "AI configuration" screen - AI runs automatically via Apple Intelligence with no setup required.
+
+CONTACTS PRIVACY (Guideline 2.1 - July 16, 2026):
 - Do you upload the user's contacts to the server? NO. Contacts are read locally via Apple's CNContactStore and stored in the on-device SwiftData database. No network call transmits contact data. AI gift suggestions run entirely on-device via Apple Intelligence - no network call is made for AI suggestions. The only network call in the app is the optional support form (which sends only user-typed message + app diagnostics - never contact data).
 - Do you share the user's contacts to any third-party? NO. The app contains zero third-party SDKs (no analytics, no advertising, no tracking). No data broker, advertising network, or third-party API receives contact information. AI gift suggestions use Apple Intelligence (on-device, iOS 26+) - no data leaves the device.
 - Privacy manifest (PrivacyInfo.xcprivacy) declares NSPrivacyTracking: false and an empty NSPrivacyCollectedDataTypes array.
@@ -116,21 +128,30 @@ AI FEATURE TESTING - IMPORTANT:
 - The app uses Apple Intelligence (on-device) as the ONLY AI provider
 - Free tier: 3 AI suggestions per month (auto-resets monthly)
 - AI Add-on ($5.99): Unlimited AI suggestions
+- WHERE TO FIND AI FEATURES (in response to Guideline 2.3):
+  - AI suggestions are NOT a separate settings screen. They are accessed per-person.
+  - Step 1: Tap the "+" button on the Home tab to add a person (name + birthday)
+  - Step 2: Tap that person's birthday card to open Person Detail View
+  - Step 3: In the "Gift Ideas" section, tap the "AI Ideas" button (wand.and.stars icon)
+  - Step 4: The AI Suggestions screen opens with budget sliders and a "Generate Ideas" button
+  - Settings -> "AI Provider" section shows the STATUS of Apple Intelligence (Active/Unavailable) and includes a footer explaining how to access AI Ideas
 - To test AI (on iOS 26+ with Apple Intelligence enabled):
   1. Open any person's detail view -> Tap "AI Ideas" button
   2. Set budget using the sliders -> Tap "Generate Ideas"
   3. View 5 AI-generated gift suggestions
   4. Tap "Add as Idea" on any suggestion to save it to gift ideas
   5. The usage banner shows remaining free suggestions (e.g., "3 of 3 free suggestions remaining this month")
-- If Apple Intelligence is not available (pre-iOS 26 or unsupported device):
-  - The AI screen shows "Apple Intelligence Required" explaining the feature is unavailable
+- If Apple Intelligence is not available (pre-iOS 26 or unsupported device, or not enabled in iOS Settings > Apple Intelligence & Siri):
+  - The AI screen shows "Apple Intelligence Required" explaining the feature is unavailable - THIS IS THE FEATURE WORKING AS DESIGNED, not a missing feature
+  - The "Apple Intelligence Required" screen includes guidance to enable it in Settings > Apple Intelligence & Siri
   - No external AI provider or outside mechanism is used
 - If free tier is exhausted: AI buttons show the paywall (NOT an error)
 - AI runs entirely on-device via Apple Intelligence - no network call is made for AI suggestions
 
 CONTACT IMPORT TESTING:
 - Requires Contacts access permission
-- Tap "+" on Home tab -> Tap "Import from Contacts"
+- Onboarding: On the final onboarding page, tap "Continue" to proceed to the system Contacts permission prompt
+- Home tab: Tap the person.2.badge.gearshape icon (top-left) or tap "Import from Contacts" on the empty state
 - Grant permission when prompted
 - App reads ONLY: name, birthday, and photo (privacy-minimized - no phone/email/address)
 - Duplicate detection prevents importing contacts already in the app

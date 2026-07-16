@@ -1,70 +1,64 @@
 # App Store Connect Reply (Paste into the Reply field)
 
-> Copy the text below and paste it into your reply to the reviewer in App Store Connect for the July 14, 2026 rejection of Giftly Pro 1.0 (5).
+> Copy the text below and paste it into your reply to the reviewer in App Store Connect for the July 16, 2026 rejection of Giftly Pro 1.0 (6).
 
 ---
 
 Hello Review Team,
 
-Thank you for the detailed feedback. We have thoroughly addressed all three issues raised in the July 14, 2026 review. Below are our direct responses and the changes made.
+Thank you for the detailed feedback. We have addressed all three issues raised in the July 16, 2026 review (Guideline 5.1.1(iv), Guideline 2.3, and Guideline 2.1). Below are our direct responses and the changes made in Build 7.
 
 ---
 
-## Guideline 2.1 — Information Needed (Contacts Privacy)
+## Guideline 5.1.1(iv) — Permission Request UI (FIXED)
 
-### Q1: Do you upload the user's contacts to the server?
+We revised the pre-permission message before the Contacts permission request. Two changes were made:
+
+**1. Button text changed to "Continue"**
+The button on the onboarding import page previously said "Import from Contacts". It now says **"Continue"**, which proceeds directly to the system Contacts permission dialog.
+
+**2. "Skip for now" button removed**
+The "Skip for now" button that allowed users to close the pre-permission message and delay the permission request has been **completely removed**. Users now always proceed to the system Contacts permission request after the message.
+
+**Fixed flow**: 3 onboarding pages → "Import in One Tap" page with a single "Continue" button → system Contacts permission dialog → user grants or denies in the system dialog → app proceeds accordingly.
+
+The pre-permission message only explains why contacts are needed ("Giftly reads ONLY names, birthdays, and photos from your contacts. No phone numbers, emails, or addresses.") and does not block or delay the permission request.
+
+**File changed**: `Giftly/Views/OnboardingView.swift`
+
+---
+
+## Guideline 2.3 — AI Configuration (FEATURE IS IMPLEMENTED)
+
+The AI feature is fully implemented in the app. It is not a separate "AI configuration" screen — AI gift suggestions are accessed per-person from the Person Detail View.
+
+**How to locate AI features:**
+1. Tap the **"+"** button (top-right) on the Home tab to add a person (name + birthday)
+2. Tap that person's birthday card to open **Person Detail**
+3. In the **"Gift Ideas"** section, tap the **"AI Ideas"** button (wand.and.stars icon)
+4. The **AI Suggestions** screen opens with budget sliders and a "Generate Ideas" button
+
+**Settings → AI Provider section**: Shows the status of Apple Intelligence (Active/Unavailable) with a footer explaining how to access AI Ideas: *"To use AI suggestions: open any person's detail and tap 'AI Ideas'."*
+
+**Why AI may appear unavailable on the review device (iPad Air 11-inch M3):**
+Apple Intelligence requires iOS 26+ with Apple Intelligence enabled in iOS Settings → Apple Intelligence & Siri. If it is not available (e.g., simulator environment or AI not enabled), the AI Suggestions screen shows an **"Apple Intelligence Required"** guidance state. This is the feature working as designed — it is not a missing feature or an error. The app uses Apple Intelligence (on-device) as the only AI provider; no external API key or third-party AI provider is involved.
+
+**Files**: `Giftly/Views/PersonDetailView.swift` (AI Ideas button), `Giftly/Views/GiftSuggestionView.swift` (AI screen), `Giftly/Services/AppleIntelligenceService.swift` (on-device AI), `Giftly/Views/SettingsView.swift` (AI Provider section)
+
+---
+
+## Guideline 2.1 — Contacts Upload Question
+
+**Q: Do you upload the user's contacts to the server?**
 
 **No.** Giftly does NOT upload user contacts to any server.
 
 - Contacts are read locally on the device using Apple's `CNContactStore` framework (`Giftly/Services/ContactImportService.swift`).
-- The app requests only these contact keys: `CNContactGivenNameKey`, `CNContactFamilyNameKey`, `CNContactBirthdayKey`, `CNContactImageDataKey`, `CNContactThumbnailImageDataKey`.
-- It does NOT request phone numbers, email addresses, postal addresses, or any other contact fields.
+- The app requests only these contact keys: `CNContactGivenNameKey`, `CNContactFamilyNameKey`, `CNContactBirthdayKey`, `CNContactImageDataKey`, `CNContactThumbnailImageDataKey` — no phone numbers, emails, or addresses.
 - Imported data (name, birthday, photo) is stored in the app's local on-device SwiftData database.
 - No network call in the app transmits contact data. The only network call is the optional "Contact Support" form, which sends only the user-typed subject/message and basic app diagnostics (app version, iOS version, device model) — never contact data.
-
-### Q2: Do you share the user's contacts to any third-party?
-
-**No.** Giftly does NOT share user contacts with any third-party.
-
-- The app contains zero third-party SDKs: no analytics, no advertising, no tracking, no crash-reporting SDKs.
-- No data broker, advertising network, or third-party API receives contact information.
-- AI suggestions now run entirely on-device via Apple Intelligence (FoundationModels framework, iOS 26+) — no data leaves the device.
-- `PrivacyInfo.xcprivacy` declares `NSPrivacyTracking: false`, `NSPrivacyTrackingDomains: []`, and `NSPrivacyCollectedDataTypes: []`.
-
----
-
-## Guideline 5 — Legal (China App Store Compliance)
-
-We have completely removed all references to ChatGPT, OpenAI, GPT, and any third-party AI provider from the app and its metadata.
-
-### Code changes
-- Deleted `Giftly/Services/GiftAIService.swift` (the previous BYO/third-party API path).
-- AI suggestions now use **only** Apple Intelligence (`FoundationModels` framework, iOS 26+), running entirely on-device.
-- Removed all user-facing strings referring to API keys or external AI providers.
-
-### Metadata and policy changes
-- App Store metadata (`keytext.md`): no references to ChatGPT, OpenAI, GPT, API keys, or BYO.
-- Privacy Policy (`docs/privacy.html`): updated AI section to describe Apple Intelligence on-device processing only.
-- Terms of Use (`docs/terms.html`): replaced the "Bring Your Own Key" section with an "AI Feature — Apple Intelligence" section.
-- Support Page (`docs/support.html`): updated AI FAQ to describe Apple Intelligence only.
-- Landing Page (`docs/index.html`): removed all API-key and third-party-AI references.
-- App Review Information (`app_review_info.md`): removed the BYO Key testing path and all third-party AI provider references.
-
-The app is now compliant for distribution in all regions, including China mainland.
-
----
-
-## Guideline 3.1.1 — Business / Payments / In-App Purchase
-
-We have removed the BYO (Bring Your Own) API Key model entirely. Users can no longer unlock or enable any functionality with an external API key.
-
-### What changed
-- There are only two In-App Purchase products, both one-time non-consumable purchases processed by Apple StoreKit 2:
-  - **Giftly Pro** ($4.99) — removes the 5-contact limit, enables contact import, gift tracking, gift history, and data export.
-  - **AI Add-on** ($5.99) — unlocks unlimited AI gift suggestions.
-- The AI Add-on unlocks unlimited on-device suggestions via Apple Intelligence. No API key, no external service, and no outside mechanism is involved.
-- The free tier still includes 3 AI suggestions per month without any purchase.
-- All feature unlocking is handled through StoreKit 2 `Transaction.currentEntitlement(for:)`; no external keys or codes are accepted.
+- AI gift suggestions run entirely on-device via Apple Intelligence — no network call is made for AI suggestions.
+- `PrivacyInfo.xcprivacy` declares `NSPrivacyTracking: false` and an empty `NSPrivacyCollectedDataTypes` array.
 
 ---
 
@@ -74,7 +68,7 @@ We have removed the BYO (Bring Your Own) API Key model entirely. Users can no lo
 - Updated Terms of Use: https://asunnyboy861.github.io/Giftly/terms.html
 - Updated Support Page: https://asunnyboy861.github.io/Giftly/support.html
 - Privacy manifest (`PrivacyInfo.xcprivacy`) is included in the app bundle.
-- Detailed review notes with testing instructions are in the App Review Information → Notes field.
+- Detailed review notes with step-by-step AI navigation are in the App Review Information → Notes field.
 
 Please let us know if any additional information is needed. We appreciate your time and guidance.
 
