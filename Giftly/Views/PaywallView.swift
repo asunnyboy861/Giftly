@@ -39,7 +39,7 @@ struct PaywallView: View {
             Text("Unlock the Full Giftly")
                 .font(.title2.weight(.bold))
                 .multilineTextAlignment(.center)
-            Text("One-time purchases. No subscriptions. Ever.")
+            Text("One-time purchases only. Pay once, yours forever.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

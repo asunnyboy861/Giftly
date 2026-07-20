@@ -10,7 +10,7 @@
 - **Bundle ID**: com.zzoutuo.Giftly
 - **Version**: 1.0 (Build 7)
 - **Category**: Lifestyle / Productivity
-- **Pricing**: Free with In-App Purchases (one-time, non-consumable — NO subscriptions)
+- **Pricing**: Free with In-App Purchases (one-time, non-consumable only)
 - **Demo Account**: Not required. Giftly is fully offline and accountless. All features are accessible immediately after download.
 
 ---
@@ -157,9 +157,9 @@ A physical-device screen recording (item 1) and physical-device testing were als
 - Socially active users (25%) with large friend circles
 - Professionals (20%) who maintain client/colleague relationships
 - Privacy-sensitive users (15%) who want local-only, no-cloud, no-account data storage
-- Anti-subscription users (5%) who prefer one-time purchases over recurring subscriptions
+- One-time pricing advocates (5%) who prefer one-time purchases over recurring billing
 
-**Value provided**: Never forget a birthday, always have a gift planned, and never repeat a gift — all with one-time pricing (no subscriptions) and complete data privacy (all data stays on-device).
+**Value provided**: Never forget a birthday, always have a gift planned, and never repeat a gift — all with one-time pricing and complete data privacy (all data stays on-device).
 
 ---
 
@@ -240,7 +240,7 @@ Specifically:
 
 ## IAP Compliance (Guideline 3.1.2)
 
-Giftly uses **one-time non-consumable purchases only** — there are NO auto-renewable subscriptions, NO trials, and NO recurring billing.
+Giftly uses **one-time non-consumable purchases only** — there are NO recurring billing, NO trials, and NO auto-renewable products.
 
 | Product ID | Type | Price | Display Name |
 |---|---|---|---|

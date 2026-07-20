@@ -2,10 +2,10 @@
 Birthday & Gift Reminder
 
 ## Promotional Text
-Never forget a birthday. Track gift ideas, get smart reminders, and plan thoughtful gifts - all with one-time pricing and no subscriptions.
+Never forget a birthday. Track gift ideas, get smart reminders, and plan thoughtful gifts - all with one-time pricing.
 
 ## Description
-Giftly is the privacy-first birthday and gift reminder that helps you never forget the people who matter most. Track birthdays, plan gifts, and get smart reminders - all with one-time pricing and no subscriptions.
+Giftly is the privacy-first birthday and gift reminder that helps you never forget the people who matter most. Track birthdays, plan gifts, and get smart reminders - all with one-time pricing.
 
 NEVER FORGET A BIRTHDAY
 - Get a countdown to every birthday with 7-day, 1-day, and day-of reminders
@@ -40,7 +40,7 @@ BEAUTIFUL AND PRIVATE
 - Search birthdays by name
 - Star favorites for quick access
 
-ONE-TIME PRICING. NO SUBSCRIPTIONS. EVER.
+ONE-TIME PRICING. PAY ONCE, YOURS FOREVER.
 - Free: Up to 5 birthdays, day-of reminders, 3 AI suggestions per month, basic features
 - Giftly Pro ($4.99 one-time): Unlimited birthdays, contact import, all reminder tiers, gift idea tracking, gift history, data export
 - Giftly AI ($5.99 one-time): Unlimited AI gift suggestions - powered by Apple Intelligence
@@ -54,7 +54,7 @@ PRIVACY FIRST
 - Privacy Policy: https://asunnyboy861.github.io/Giftly/privacy.html
 - Terms of Use: https://asunnyboy861.github.io/Giftly/terms.html
 
-Giftly was built by people who hate subscriptions as much as you do. One purchase, yours forever.
+Giftly was built by people who believe in one-time pricing. One purchase, yours forever.
 
 ## Keywords
 countdown,calendar,wishlist,notification,present,holiday,friends,family,party,age,reminder,gift
@@ -72,7 +72,7 @@ FEATURES
 - Calendar view of all birthdays grouped by month
 - Actionable notifications with Call, Message, and Gift Ideas buttons
 - Person detail view with age, zodiac sign, and gift history
-- One-time purchases - no subscriptions, ever
+- One-time purchases only - pay once, use forever
 - Privacy-first: all data stays on your device using SwiftData
 - Data export and import (JSON backup)
 - Dark mode support
@@ -83,7 +83,7 @@ PRICING
 - Giftly Pro ($4.99 one-time): Unlimited birthdays, contact import, gift tracking, data export
 - Giftly AI ($5.99 one-time): Unlimited AI gift suggestions - powered by Apple Intelligence
 
-We built Giftly because we were tired of subscription-only birthday apps. Pay once, use forever.
+We built Giftly because we believe in one-time pricing for birthday apps. Pay once, use forever.
 
 ## Review Notes
 Thank you for reviewing Giftly!
